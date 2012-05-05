@@ -1,0 +1,3 @@
+This project is an attempt to port OpenCV library to Racket by using the [[http://docs.racket-lang.org/foreign/index.html?q=ctype&q=_cpointer&q=make-cvector&q=time*&q=time&q=yield][Racket Foreign Interface]].
+In the beginning I will try to provide some basic functionality that I use myself.
+Later on, I might port the rest.
