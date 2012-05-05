@@ -129,16 +129,16 @@
      [align _int]
      [width _int]
      [height _int]
-     [roi _gcpointer]
-     [maskROI _gcpointer]
-     [imageId _gcpointer]
-     [IplTileInfo _gcpointer]
+     [roi _pointer]
+     [maskROI _pointer]
+     [imageId _pointer]
+     [IplTileInfo _pointer]
      [imageSize _int]
-     [imageData _gcpointer]
+     [imageData _pointer]
      [widthStep _int]
      [BorderMode (_array _uint8 4)]
      [BorderConst (_array _uint8 4)]
-     [imageDataOrigin _gcpointer]))
+     [imageDataOrigin _pointer]))
 
   (define-cstruct _IplROI
     ([coi _int] ;;0 - no COI (all channels are selected), 1 - 0th channel is selected 
@@ -161,3 +161,7 @@
      [anchorX  _int]
      [anchorY  _int]
      [values _pointer])))
+
+
+
+;;; CvMat Data Type

@@ -37,46 +37,7 @@
    ;; for internal use only
    [refcount _gcpointer]
    [hdr_refcount _int]
-   
-   
    ))
-typedef struct CvMat
-{
-    int type;
-    int step;
-
-    /* for internal use only */
-    int* refcount;
-    int hdr_refcount;
-
-    union
-    {
-        uchar* ptr;
-        short* s;
-        int* i;
-        float* fl;
-        double* db;
-    } data;
-
-#ifdef __cplusplus
-    union
-    {
-        int rows;
-        int height;
-    };
-
-    union
-    {
-        int cols;
-        int width;
-    };
-#else
-    int rows;
-    int cols;
-#endif
-
-}
-CvMat;
-
 ;;; Procedures
 (define-opencv-highgui cvCreateMat (_fun _int _int _int -> _pointer))
+
