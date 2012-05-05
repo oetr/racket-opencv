@@ -1,0 +1,4 @@
+These keywords are created to make the search find my project easier.
+racket, Racket, OpenCV, opencv
+opencv racket
+racket opencv
