@@ -7,3 +7,7 @@ Later on, I might port the rest.
 - Mac OS X 10.7.3
 - Racket v5.2.1, Intel 64-Bit
 - OpenCV @2.3.1a, 64-Bit, downloaded and compiled through MacPorts
+
+
+* Help Needed
+Help is needed in making the API more Racket-like.

@@ -58,6 +58,7 @@
   (define-opencv-highgui cvNamedWindow (_fun _string _int -> _int))
   (define-opencv-highgui cvShowImage (_fun _string _pointer -> _void))
   (define-opencv-highgui cvDestroyWindow (_fun _string -> _void))
+  (define-opencv-highgui cvWaitKey (_fun _int -> _void))
 
 
 
