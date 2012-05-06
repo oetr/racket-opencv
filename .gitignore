@@ -12,4 +12,5 @@
 *.log
 compiled/
 CMakeFiles/
-
+Makefile
+CMakeCache.txt
