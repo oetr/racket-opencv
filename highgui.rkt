@@ -54,20 +54,23 @@
   (define CV_LOAD_IMAGE_ANYCOLOR   4)  ;; ? any color
 
 ;;; Procedures
-  (define-opencv-highgui cvLoadImage (_fun _string _int -> _pointer))
-  (define-opencv-highgui cvNamedWindow (_fun _string _int -> _int))
-  (define-opencv-highgui cvShowImage (_fun _string _pointer -> _void))
-  (define-opencv-highgui cvDestroyWindow (_fun _string -> _void))
-  (define-opencv-highgui cvWaitKey (_fun _int -> _void))
-
+  (define-opencv-highgui cvLoadImage
+    (_fun _string _int -> _pointer))
+  
+  (define-opencv-highgui cvNamedWindow
+    (_fun _string _int -> _int))
+  
+  (define-opencv-highgui cvShowImage
+    (_fun _string _pointer -> _void))
+  
+  (define-opencv-highgui cvDestroyWindow
+    (_fun _string -> _void))
+  
+  (define-opencv-highgui cvWaitKey
+    (_fun _int -> _void))
 
 
 ;;; Matrix
-  (define data (_union (_cpointer _ubyte)
-                       (_cpointer _short)
-                       (_cpointer _int)
-                       (_cpointer _float)
-                       (_cpointer _double)))
 
   (define-cstruct _CvMat
     ([type _int]
@@ -79,6 +82,5 @@
      [cols _int]))
 
   (define-opencv-highgui cvCreateMat (_fun _int _int _int -> _pointer))
-
 
   )
