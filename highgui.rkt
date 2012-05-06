@@ -1,8 +1,5 @@
 ;; Author: Petr Samarin
-;; Description:
-;; Porting opencv library to Racket
-;; Keywords: opencv racket, racket opencv
-;; Note: I hope, there is a better way to make github find this project
+;; Description: Porting highgui_c.h to Racket
 
 (module highgui racket
   (provide (all-defined-out))
