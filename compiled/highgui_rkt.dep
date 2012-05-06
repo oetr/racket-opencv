@@ -1,1 +1,0 @@
-("5.2.1" ("acb4bfdba892d7027540d427f7546d809028fdd2" . "f920103aa3cefb34a47c2bd940f1e96e038e55ac") (collects #"racket" #"main.rkt") (collects #"ffi" #"unsafe.rkt") (collects #"ffi" #"unsafe" #"define.rkt") #"/Users/petr/Dropbox/Programming/Racket/OpenCV/types.rkt" (collects #"rackunit" #"main.rkt"))

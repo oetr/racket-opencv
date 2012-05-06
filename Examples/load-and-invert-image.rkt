@@ -17,7 +17,7 @@
 ;;; Load an image from the hard disk
 (define img
   (ptr-ref
-   (cvLoadImage "test-image.png" CV_LOAD_IMAGE_COLOR)
+   (cvLoadImage "images/test-image.png" CV_LOAD_IMAGE_COLOR)
    _IplImage))
 
 ;;; Get image properties
