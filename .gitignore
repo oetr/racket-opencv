@@ -1,2 +1,14 @@
 .DS_Store
 *.*~
+*.dep
+*.zo
+*.cmake
+*.make
+*.marks
+*.o
+*.internal
+*.check_cache
+*.includecache
+*.log
+compiled/
+

@@ -1,1 +1,0 @@
-/Users/petr/Dropbox/Programming/Racket/OpenCV/Examples/CMakeFiles/load_and_invert_image.dir
