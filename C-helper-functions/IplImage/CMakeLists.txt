@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( ipl_helper )
+find_package( OpenCV REQUIRED )
+add_executable( ipl_helper ipl_helper)
+add_library(libraryipl SHARED ipl_helper)
+target_link_libraries( ipl_helper  ${OpenCV_LIBS} )

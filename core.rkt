@@ -26,18 +26,15 @@
 (define a (make-c-array 20 _int))
 (array-filter (lambda (x) (< x 10)) a 20)
 
-
-
-
 ;;; Structs
-(define data (_union (_cpointer _ubyte)))
-(define-cstruct _CvMat
-  ([type _int]
-   [step _int]
-   ;; for internal use only
-   [refcount _gcpointer]
-   [hdr_refcount _int]
-   ))
+;; (define data (_union (_cpointer _ubyte)))
+;; (define-cstruct _CvMat
+;;   ([type _int]
+;;    [step _int]
+;;    ;; for internal use only
+;;    [refcount _gcpointer]
+;;    [hdr_refcount _int]
+;;    ))
 ;;; Procedures
-(define-opencv-highgui cvCreateMat (_fun _int _int _int -> _pointer))
+;;(define-opencv-highgui cvCreateMat (_fun _int _int _int -> _pointer))
 

@@ -26,3 +26,4 @@
   (unless (>= key 0)
     (loop)))
 
+(cvDestroyWindow "Video Capture")
