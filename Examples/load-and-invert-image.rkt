@@ -32,12 +32,12 @@
 ;;; Get image data
 (define data (IplImage-imageData img))
 
-;;; Invert all pixels
-(time (let loop ([i (- (* width height channels) 1)])
+;;; Invert all pixels using pointers: --> very slow
+;; TODO: provide a C function to speed this up?
+(time (let loop ([i (* width height channels)])
         (when (>= i 0)
           ;; invert each pixel channel-wise
-          (ptr-set! data _ubyte i
-                    (- 255 (ptr-ref data _ubyte i)))
+          (ptr-set! data _ubyte i (- 255 (ptr-ref data _ubyte i)))
           (loop (- i 1)))))
 
 ;;; Show the image

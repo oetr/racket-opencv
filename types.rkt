@@ -161,7 +161,3 @@
      [anchorX  _int]
      [anchorY  _int]
      [values _pointer])))
-
-
-
-;;; CvMat Data Type

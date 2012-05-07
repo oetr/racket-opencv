@@ -67,20 +67,21 @@
     (_fun _string -> _void))
   
   (define-opencv-highgui cvWaitKey
-    (_fun _int -> _void))
+    (_fun _int -> _int))
 
+  ;; Video Capture  
+  (define _CvCapture (make-ctype _pointer  #f #f))
+  
+  (define-opencv-highgui cvCreateCameraCapture
+    (_fun _int -> _CvCapture))
+  
+  (define cvCaptureFromCAM cvCreateCameraCapture)
 
-;;; Matrix
+  (define-opencv-highgui cvGrabFrame
+    (_fun _pointer -> _int))
 
-  (define-cstruct _CvMat
-    ([type _int]
-     [step _int]
-     ;; for internal use only
-     [refcount _gcpointer]
-     [hdr_refcount _int]
-     [rows _int]
-     [cols _int]))
+  (define-opencv-highgui cvRetrieveFrame
+    (_fun _pointer _int -> _pointer))
 
-  (define-opencv-highgui cvCreateMat (_fun _int _int _int -> _pointer))
 
   )
