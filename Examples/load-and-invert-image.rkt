@@ -46,7 +46,7 @@
 ;; (array-set! cvscalar 2 0.0)
 ;; (array-set! cvscalar 3 0.0)
 
-(cvDilate img img #f 10)
+(cvErode img img #f 5)
 
 (printf "adds time: ~n")
 (time (cvAddS img (make-CvScalar cvscalar) img #f))
