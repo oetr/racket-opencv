@@ -7,11 +7,15 @@
   (require ffi/unsafe
            ffi/unsafe/define)
 
+  (define-ffi-definer define-opencv-core
+    (ffi-lib "/opt/local/lib/libopencv_core"))
+
   (require "types.rkt")
 
-
 ;;; FFI Definers
-  (define-opencv-core cvSetImageROI (_fun _IplImage _CvRect -> _void))
+  (define-opencv-core cvSetImageROI (_fun _pointer _CvRect -> _void))
+
+  (define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
   ;; (define (make-c-array size type)
   ;;   (define a (_array type size))

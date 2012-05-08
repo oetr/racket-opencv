@@ -7,9 +7,6 @@
   (define-ffi-definer define-opencv-highgui
     (ffi-lib "/opt/local/lib/libopencv_highgui"))
 
-  (define-ffi-definer define-opencv-core
-    (ffi-lib "/opt/local/lib/libopencv_core"))
-
   (define CvArr _void)
 
   (define-cstruct _CvScalar
