@@ -13,11 +13,12 @@
 
 (require "../types.rkt")
 (require "../highgui.rkt")
+(require "../core.rkt")
 
 ;;; Load an image from the hard disk
 (define img
   (ptr-ref
-   (cvLoadImage "images/test-image.png" CV_LOAD_IMAGE_COLOR)
+   (cvLoadImage "images/test.png" CV_LOAD_IMAGE_COLOR)
    _IplImage))
 
 ;;; Get image properties
@@ -30,21 +31,33 @@
         width height step channels)
 
 ;;; Get image data
-(define data #f)
-(time (set! data (IplImage-imageData img)))
+(define data (IplImage-imageData img))
+(define rect (make-CvRect 10 10 20 20))
+(cvSetImageROI img (make-CvRect 10 10 20 20))
 
 (define n-channel-matrix
   (_array _ubyte (* width height channels)))
 
-(define array-data #f)
 
-(time (set! array-data (ptr-ref (IplImage-imageData img)
-                          n-channel-matrix)))
+(define array-data (ptr-ref (IplImage-imageData img)
+                            n-channel-matrix))
 
 (time (let loop ([i (- (* width height channels) 1)])
         (when (>= i 0)
           ;; invert each pixel channel-wise
           (array-set! array-data i (- 255 (array-ref array-data i)))
+          (loop (- i 1)))))
+
+(define height 640)
+(define width 480)
+(define channels 3)
+(define N (* height width channels))
+(define a-vector (make-vector (* width height channels) 0))
+
+(time (let loop ([i (- (* 640 480 3) 1)])
+        (when (>= i 0)
+          ;; invert each pixel channel-wise
+          (vector-set! a-vector i (- 255 (vector-ref a-vector i)))
           (loop (- i 1)))))
 
 (require ffi/cvector)
@@ -69,10 +82,16 @@
 
 ;;; Invert all pixels using pointers: --> very slow
 ;; TODO: provide a C function to speed this up?
-(time (let loop ([i (* width height channels)])
+(time (let loop ([i (- (* width height channels) 1)])
         (when (>= i 0)
           ;; invert each pixel channel-wise
           (ptr-set! data _ubyte i (- 255 (ptr-ref data _ubyte i)))
+          (loop (- i 1)))))
+
+(time (let loop ([i (- (* width height channels) 1)])
+        (when (>= i 0)
+          ;; invert each pixel channel-wise
+          (ptr-set! data _byte i (- 255 (ptr-ref data _byte i)))
           (loop (- i 1)))))
 
 ;;; Show the image

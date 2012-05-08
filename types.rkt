@@ -2,7 +2,7 @@
   (provide (all-defined-out))
 
   (require ffi/unsafe
-         ffi/unsafe/define)
+           ffi/unsafe/define)
   
   (define-ffi-definer define-opencv-highgui
     (ffi-lib "/opt/local/lib/libopencv_highgui"))
@@ -116,29 +116,11 @@
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;               Image type (IplImage)                                 
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (define-cstruct _IplImage
-    ([nSize _int]
-     [ID _int]
-     [nChannels _int]
-     [alphaChannel _int]
-     [depth _int]
-     [colorModel (_array _uint8 4)]
-     [channelSeq (_array _uint8 4)]
-     [dataOrder _int]
-     [origin _int]
-     [align _int]
+    (define-cstruct _CvRect
+    ([x _int]
+     [y _int]
      [width _int]
-     [height _int]
-     [roi _pointer]
-     [maskROI _pointer]
-     [imageId _pointer]
-     [IplTileInfo _pointer]
-     [imageSize _int]
-     [imageData _pointer]
-     [widthStep _int]
-     [BorderMode (_array _uint8 4)]
-     [BorderConst (_array _uint8 4)]
-     [imageDataOrigin _pointer]))
+     [height _int]))
 
   (define-cstruct _IplROI
     ([coi _int] ;;0 - no COI (all channels are selected), 1 - 0th channel is selected 
@@ -146,6 +128,30 @@
      [yOffset _int]
      [width _int]
      [height _int]))
+  
+  (define-cstruct _IplImage
+    ([nSize _int]
+     [ID _int]
+     [nChannels _int]
+     [alphaChannel _int]
+     [depth _int]
+     [colorModel (_array _ubyte 4)]
+     [channelSeq (_array _ubyte 4)]
+     [dataOrder _int]
+     [origin _int]
+     [align _int]
+     [width _int]
+     [height _int]
+     [roi (_cpointer _IplROI)]
+     [maskROI (_cpointer _IplImage)]
+     [imageId _pointer]
+     [IplTileInfo _pointer]
+     [imageSize _int]
+     [imageData (_cpointer _bytes)]
+     [widthStep _int]
+     [BorderMode (_array _int 4)]
+     [BorderConst (_array _int 4)]
+     [imageDataOrigin (_cpointer _ubyte)]))
 
   (define-cstruct _IplConvKernel
     ([nCols  _int]
