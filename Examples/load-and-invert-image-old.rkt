@@ -1,4 +1,4 @@
-#!/Users/petr/Applications/Racket/bin/racket
+#! /usr/bin/env racket
 #lang racket
 
 ;; Author: Petr Samarin
