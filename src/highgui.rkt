@@ -361,15 +361,15 @@
 
 
   ;; Data given from depth generator.
-  (define CV_CAP_OPENNI_DEPTH_MAP                  0) ;; Depth values in mm (CV_16UC1)
-  (define CV_CAP_OPENNI_POINT_CLOUD_MAP            1) ;; XYZ in meters (CV_32FC3)
-  (define CV_CAP_OPENNI_DISPARITY_MAP              2) ;; Disparity in pixels (CV_8UC1)
-  (define CV_CAP_OPENNI_DISPARITY_MAP_32F          3) ;; Disparity in pixels (CV_32FC1)
-  (define CV_CAP_OPENNI_VALID_DEPTH_MASK           4) ;; (CV_8UC1)
+  (define CV_CAP_OPENNI_DEPTH_MAP         0) ;; Depth values in mm (CV_16UC1)
+  (define CV_CAP_OPENNI_POINT_CLOUD_MAP   1) ;; XYZ in meters (CV_32FC3)
+  (define CV_CAP_OPENNI_DISPARITY_MAP     2) ;; Disparity in pixels (CV_8UC1)
+  (define CV_CAP_OPENNI_DISPARITY_MAP_32F 3) ;; Disparity in pixels (CV_32FC1)
+  (define CV_CAP_OPENNI_VALID_DEPTH_MASK  4) ;; (CV_8UC1)
 
   ;; Data given from RGB image generator.
-  (define CV_CAP_OPENNI_BGR_IMAGE                  5)
-  (define CV_CAP_OPENNI_GRAY_IMAGE                 6)
+  (define CV_CAP_OPENNI_BGR_IMAGE         5)
+  (define CV_CAP_OPENNI_GRAY_IMAGE        6)
 
 
   ;; Supported output modes of OpenNI image generator
@@ -414,7 +414,9 @@
          (arithmetic-shift (bitwise-and c3 255) 16)
          (arithmetic-shift (bitwise-and c4 255) 24))))
 
-  (define CV_FOURCC_PROMPT -1)  ;; Open Codec Selection Dialog (Windows only)
+  ;; Open Codec Selection Dialog (Windows only)
+  (define CV_FOURCC_PROMPT -1)
+  
   (define CV_FOURCC_DEFAULT (CV_FOURCC 'I 'Y 'U 'V))
 
   ;; initialize video file writer
@@ -429,9 +431,9 @@
   (define-opencv-highgui cvReleaseVideoWriter
     (_fun (_ptr i _pointer) -> _void))
 
-  ;; *******************************************************************************
+  ;; ********************************************************************
   ;;                       Obsolete functions/synonyms
-  ;; *******************************************************************************
+  ;; ********************************************************************
   (define cvCaptureFromFile cvCreateFileCapture)
   (define cvCaptureFromCAM cvCreateCameraCapture)
   (define cvCaptureFromAVI cvCaptureFromFile)  
