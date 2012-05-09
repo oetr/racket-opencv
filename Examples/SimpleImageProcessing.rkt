@@ -4,8 +4,13 @@
 ;; Author: Petr Samarin
 ;; Date: 2012
 ;; Description:
-;; Load an image and invert all pixel values
-;; Original example converted from http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/
+;; 1) Load an image
+;; 2) Set region of interest (ROI) rectangle
+;; 3) Apply erosion on ROI
+;; 4) Invert the whole image
+;; This example was inspired by:
+;; http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/
+;; and the book "Learning OpenCV" by Bradski and Kaehler, 2008
 
 ;;; Includes
 (require ffi/unsafe)

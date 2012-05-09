@@ -17,8 +17,10 @@
 (define image-name #f)
 
 (if (zero? (vector-length arguments))
-    (error 'load-and-invert-image-old "provide image name~n")
-    (set! image-name (vector-ref arguments 0)))
+  (begin
+    (printf "provide image name~n")
+    (exit))    
+  (set! image-name (vector-ref arguments 0)))
 
 ;;; Load an image from the hard disk
 (define bm (make-object bitmap% image-name))
@@ -54,7 +56,6 @@
 
 (define canvas (new canvas% [parent frame]))
 (define dc (send canvas get-dc))
-
 
 (send frame show #t)
 (sleep/yield 0.01)
