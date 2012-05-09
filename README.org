@@ -1,9 +1,15 @@
-This project is an attempt to port OpenCV library to Racket by using the [[http://docs.racket-lang.org/foreign/index.html?q=ctype&q=_cpointer&q=make-cvector&q=time*&q=time&q=yield][Racket Foreign Interface]].
-In the beginning I will try to provide some basic functionality that I use myself.
-Later on, I might port the rest.
+This project ports a subset of the OpenCV C library to Racket by using the [[http://docs.racket-lang.org/foreign/index.html?q=ctype&q=_cpointer&q=make-cvector&q=time*&q=time&q=yield][Racket Foreign Interface]].
+Names of OpenCV structures and functions have been left unchanged, i.e., C function cvCaptureFromCAM(int index) can be used in Racket as (cvCaptureFromCAM index).
 
+* Supported Subset
+- IplImage: load and visualize images
+- Video: grab images from a camera
+- Image processing: erosion, dilation, sobel edge detection
 
-* My System
+* Image Manipulation in Racket
+It is possible to manipulate the images in Racket, however, OpenCV procedures should /always/ be preferred to Racket procedures whenever available.
+
+* Reference System
 - Mac OS X 10.7.3
 - Racket v5.2.1, Intel 64-Bit
 - OpenCV @2.3.1a, 64-Bit, downloaded and compiled through MacPorts
