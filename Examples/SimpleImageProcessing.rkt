@@ -46,9 +46,7 @@
 ;; convert data to bytestring
 ;; TODO: make this conversion to Racket bytes automatically
 ;; without the need to require ffi/unsafe library
-(define data
-  (make-sized-byte-string (IplImage-imageData img)
-                          (* width height channels)))
+(define data (IplImage-imageData img (* width height channels)))
 
 ;; Invert all pixel values
 ;; Slow image manipulation by using bytes
@@ -61,6 +59,8 @@
 ;;; Show the image
 (cvNamedWindow "Main Window" CV_WINDOW_AUTOSIZE)
 (cvShowImage "Main Window" img)
+(define x (cvGetWindowHandle "Main Window"))
+(cvMoveWindow "Main Window" 100 100)
 
 ;;; Wait for a key before destroying the window
 (define key (cvWaitKey 0))

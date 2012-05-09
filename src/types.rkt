@@ -154,11 +154,15 @@
      [imageId _pointer]
      [IplTileInfo _pointer]
      [imageSize _int]
-     [imageData (_cpointer _ubyte)]
+     [imageDataInternal (_cpointer _ubyte)]
      [widthStep _int]
      [BorderMode (_array _int 4)]
      [BorderConst (_array _int 4)]
      [imageDataOrigin (_cpointer _ubyte)]))
+
+  (define (IplImage-imageData img size)
+    (make-sized-byte-string (IplImage-imageDataInternal img)
+                            size))
 
   (define-cstruct _IplConvKernel
     ([nCols  _int]
