@@ -12,7 +12,11 @@
 
   (require "types.rkt")
 
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; Image processing procedures
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  
   ;; Erodes input image (applies minimum filter) one or more times.
   ;; If element pointer is NULL, 3x3 rectangular element is used.
   (define-opencv-imgproc cvErode
@@ -22,7 +26,6 @@
   ;; If element pointer is NULL, 3x3 rectangular element is used.
   (define-opencv-imgproc cvDilate
     (_fun _pointer _pointer _pointer _int -> _void))
-
 
   ;; Calculates an image derivative using generalized Sobel
   ;; (aperture_size = 1,3,5,7) or Scharr (aperture_size = -1) operator.

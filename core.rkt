@@ -26,11 +26,11 @@
                                           -> (ipl-image : (_ptr io _IplImage))
                                           -> (ptr-ref ipl-image _IplImage)))
 
-  ;; (define (make-c-array size type)
-  ;;   (define a (_array type size))
-  ;;   (define ptr (malloc type 'atomic))
-  ;;   (ptr-ref ptr a))
 
+  (define (make-c-array size type)
+    (define a (_array type size))
+    (define ptr (malloc type 'atomic))
+    (ptr-ref ptr a))
 
   ;; (define (array-filter fn array min max)
   ;;   (if (= min max) empty
