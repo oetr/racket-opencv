@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
 
     printf ("cap: %d\n", CV_CAP_OPENNI_IMAGE_GENERATOR);
     printf ("cv_fourcc: %d\n", CV_FOURCC('Z', 'Z', 'Z', 'Z'));
+    printf ("default cv_fourcc: %d\n", CV_FOURCC_DEFAULT);
+    
     
     return 0;
 }

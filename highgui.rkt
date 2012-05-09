@@ -9,12 +9,16 @@
            ffi/unsafe/define)
   ;; Ported OpenCV requirements
   (require "types.rkt")
+  (require "core.rkt")
   ;; Unit Testing
   (require rackunit)
 
-  (define-cstruct _CvPoint
-    ([x _int]
-     [y _int]))
+  ;; this function is used to set some external parameters in case of X Window
+  (define-opencv-highgui cvInitSystem
+    (_fun _int (_ptr i (_ptr i _ubyte)) -> _int))
+
+  (define-opencv-highgui cvStartWindowThread
+    (_fun -> _int))
 
   ;; ----- YV -------
   ;;These 3 flags are used by cvSet/GetWindowProperty
@@ -55,7 +59,6 @@
   (define-opencv-highgui cvMoveWindow
     (_fun _string _int _int -> _void))
 
-
   ;; destroy window and all the trackers associated with it
   (define-opencv-highgui cvDestroyWindow
     (_fun _string -> _void))
@@ -64,6 +67,54 @@
     (_fun -> _void))
 
 
+  ;; get native window handle (HWND in case of Win32 and Widget in case of X Window)
+  (define-opencv-highgui cvGetWindowHandle
+    (_fun _string -> _pointer))
+
+  ;; get name of highgui window given its native handle */
+  (define-opencv-highgui cvGetWindowName
+    (_fun _pointer -> _pointer))
+
+  (define CvTrackbarCallback (_fun _int -> _void))
+
+  ;; create trackbar and display it on top of given window, set callback
+  (define-opencv-highgui cvCreateTrackbar
+    (_fun _string _string _pointer _int CvTrackbarCallback -> _int))
+
+  (define CvTrackbarCallback2 (_fun _int _pointer -> _void))
+
+  (define-opencv-highgui cvCreateTrackbar2
+    (_fun _string _string _pointer _int CvTrackbarCallback2 _pointer -> _int))
+
+  ;; retrieve or set trackbar position
+  (define-opencv-highgui cvGetTrackbarPos
+    (_fun _string _string -> _int))
+  (define-opencv-highgui cvSetTrackbarPos
+    (_fun _string _string _int -> _void))
+
+  (define CV_EVENT_MOUSEMOVE      0)
+  (define CV_EVENT_LBUTTONDOWN    1)
+  (define CV_EVENT_RBUTTONDOWN    2)
+  (define CV_EVENT_MBUTTONDOWN    3)
+  (define CV_EVENT_LBUTTONUP      4)
+  (define CV_EVENT_RBUTTONUP      5)
+  (define CV_EVENT_MBUTTONUP      6)
+  (define CV_EVENT_LBUTTONDBLCLK  7)
+  (define CV_EVENT_RBUTTONDBLCLK  8)
+  (define CV_EVENT_MBUTTONDBLCLK  9)
+
+  (define CV_EVENT_FLAG_LBUTTON   1)
+  (define CV_EVENT_FLAG_RBUTTON   2)
+  (define CV_EVENT_FLAG_MBUTTON   4)
+  (define CV_EVENT_FLAG_CTRLKEY   8)
+  (define CV_EVENT_FLAG_SHIFTKEY  16)
+  (define CV_EVENT_FLAG_ALTKEY    3)
+
+  (define CvMouseCallback (_fun _int _int _int _int _pointer -> _void))
+  ;;  assign callback for mouse events
+  (define-opencv-highgui cvSetMouseCallback
+    (_fun _string CvMouseCallback _pointer -> _int))
+  
   ;; 8bit, color or not
   (define CV_LOAD_IMAGE_UNCHANGED  -1)
   ;; 8bit, gray
@@ -99,6 +150,24 @@
   (define-opencv-highgui cvSaveImage
     (_fun _string (_ptr i _IplImage) _pointer
           -> _int))
+
+  ;; decode image stored in the buffer
+  (define-opencv-highgui cvDecodeImage
+    (_fun _pointer _int -> _pointer))
+
+  (define-opencv-highgui cvDecodeImageM
+    (_fun _pointer _int -> _pointer))
+
+  ;; encode image and store the result as a byte vector (single-row 8uC1 matrix)
+  (define-opencv-highgui cvEncodeImage
+    (_fun _string _pointer _pointer -> _pointer))
+
+  (define CV_CVTIMG_FLIP      1)
+  (define CV_CVTIMG_SWAP_RB   2)
+
+  ;; utility function: convert one image to another with optional vertical flip
+  (define-opencv-highgui cvConvertImage
+    (_fun _pointer _pointer _int -> _void))
 
   ;; wait for key event infinitely (delay<=0) or for "delay" milliseconds
   (define-opencv-highgui cvWaitKey
@@ -153,8 +222,6 @@
   ;; index = camera_index + domain_offset (CV_CAP_*)
   (define-opencv-highgui cvCreateCameraCapture
     (_fun _int -> _pointer))
-  ;; an alias 
-  (define cvCaptureFromCAM cvCreateCameraCapture)
 
   ;; grab a frame, return 1 on success, 0 on fail.
   ;; this function is thought to be fast
@@ -346,6 +413,44 @@
          (arithmetic-shift (bitwise-and c2 255) 8)
          (arithmetic-shift (bitwise-and c3 255) 16)
          (arithmetic-shift (bitwise-and c4 255) 24))))
+
+  (define CV_FOURCC_PROMPT -1)  ;; Open Codec Selection Dialog (Windows only)
+  (define CV_FOURCC_DEFAULT (CV_FOURCC 'I 'Y 'U 'V))
+
+  ;; initialize video file writer
+  (define-opencv-highgui cvCreateVideoWriter
+    (_fun _file _int _double _CvSize _int -> _int))
+
+  ;; write frame to video file
+  (define-opencv-highgui cvWriteFrame
+    (_fun _pointer (_ptr i _IplImage) -> _int)) 
+
+  ;; close video file writer
+  (define-opencv-highgui cvReleaseVideoWriter
+    (_fun (_ptr i _pointer) -> _void))
+
+  ;; *******************************************************************************
+  ;;                       Obsolete functions/synonyms
+  ;; *******************************************************************************
+  (define cvCaptureFromFile cvCreateFileCapture)
+  (define cvCaptureFromCAM cvCreateCameraCapture)
+  (define cvCaptureFromAVI cvCaptureFromFile)  
+  (define cvCreateAVIWriter cvCreateVideoWriter)
+  (define cvWriteToAVI cvWriteFrame)
+  (define (cvAddSearchPath path) (void))
+  (define cvvInitSystem cvInitSystem)
+  (define cvvNamedWindow cvNamedWindow)
+  (define cvvShowImage cvShowImage)
+  (define cvvResizeWindow cvResizeWindow)
+  (define cvvDestroyWindow cvDestroyWindow)
+  (define cvvCreateTrackbar cvCreateTrackbar)
+  (define (cvvLoadImage name) (cvLoadImage name 1))
+  (define cvvSaveImage cvSaveImage)
+  (define cvvAddSearchPath cvAddSearchPath)
+  (define (cvvWaitKey name) (cvWaitKey 0))
+  (define (cvvWaitKeyEx name delay) (cvWaitKey delay))
+  (define cvvConvertImage cvConvertImage)
+  (define HG_AUTOSIZE CV_WINDOW_AUTOSIZE)
 
 
   )

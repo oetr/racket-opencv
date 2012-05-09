@@ -115,6 +115,10 @@
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;               Image type (IplImage)                                 
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (define-cstruct _CvPoint
+    ([x _int]
+     [y _int]))
+  
   (define-cstruct _CvSize
     ([width _int]
      [height _int]))

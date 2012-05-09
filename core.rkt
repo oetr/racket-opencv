@@ -32,6 +32,24 @@
     (define ptr (malloc type 'atomic))
     (ptr-ref ptr a))
 
+
+  ;; Font structure
+  (define-cstruct _CvFont
+    ([nameFont _string]     ;; Qt:nameFont
+     ;; Qt:ColorFont -> cvScalar(blue_component, green_component,
+     ;; red\_component[, alpha_component])
+     [color _CvScalar] 
+     [font_face _int]       ;; Qt: bool italic         =CV_FONT_
+     [ascii (_ptr i _int)]  ;; font data and metrics
+     [greek _string]
+     [cyrillic (_ptr i _int)]
+     [hscale _float]
+     [vscale _float]
+     [shear  _float]        ;; slope coefficient: 0 - normal, >0 - italic
+     [thickness  _int]      ;; Qt: weight   letters thickness
+     [dx     _float]        ;; horizontal interval between letters
+     [line_type _int]))	    ;; Qt: PointSize
+
   ;; (define (array-filter fn array min max)
   ;;   (if (= min max) empty
   ;;       (let ([value (array-ref array min)])        
