@@ -6,10 +6,17 @@ Names of OpenCV structures and functions have been left unchanged, i.e., C funct
 - Video: grab images from a camera
 - Image processing: erosion, dilation, sobel edge detection
 
-* Image Manipulation in Racket
-It is possible to manipulate the images in Racket, however, OpenCV procedures should /always/ be preferred to Racket procedures whenever available.
-
 * Reference System
 - Mac OS X 10.7.3
 - Racket v5.2.1, Intel 64-Bit
 - OpenCV @2.3.1a, 64-Bit, downloaded and compiled through MacPorts
+
+* Examples
+There are some examples that show how to use the library.
+
+** Video.rkt
+This example demonstrates how to capture frames from a camera, apply Sobel edge detection on captured frames and to visualize the results in a window.
+
+
+* Image Manipulation in Racket
+It is possible to manipulate the images in Racket, however, OpenCV procedures should /always/ be preferred to Racket procedures whenever available.
