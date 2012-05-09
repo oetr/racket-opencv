@@ -17,10 +17,7 @@
 (require "../imgproc.rkt")
 
 ;;; Load an image from the hard disk
-(define img
-  (ptr-ref
-   (cvLoadImage "images/test.png" CV_LOAD_IMAGE_COLOR)
-   _IplImage))
+(define img (cvLoadImage "images/test.png" CV_LOAD_IMAGE_COLOR))
 
 ;;; Get image properties
 (define height     (IplImage-height img))
@@ -32,9 +29,11 @@
         width height step channels)
 
 ;;; Get image data
-(define data (make-sized-byte-string (IplImage-imageData img)
-                                     (* width height channels)))
-(time 20 (let loop ([i (- (* 640 480 3) 1)])
+(define data
+  (make-sized-byte-string (IplImage-imageData img)
+                          (* width height channels)))
+
+(time (let loop ([i (- (* width height channels) 1)])
         (when (>= i 0)
           ;; invert each pixel channel-wise
           (bytes-set! data i (- 255 (bytes-ref data i)))

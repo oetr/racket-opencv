@@ -17,6 +17,15 @@
 
   (define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
+  (define-opencv-core cvCopy (_fun (src : _pointer)
+                                   (dst : (_ptr i _IplImage))
+                                   _pointer
+                                   -> _void))
+
+  (define-opencv-core cvCreateImage (_fun _CvSize _int _int
+                                          -> (ipl-image : (_ptr io _IplImage))
+                                          -> (ptr-ref ipl-image _IplImage)))
+
   ;; (define (make-c-array size type)
   ;;   (define a (_array type size))
   ;;   (define ptr (malloc type 'atomic))

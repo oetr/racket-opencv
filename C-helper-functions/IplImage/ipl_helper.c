@@ -34,5 +34,10 @@ void ipl_apply_fn (int (*fn)(int), uchar* img_data, int data_length)
 
 int main(int argc, char *argv[])
 {
+    printf ("SIGN: %d\n", IPL_DEPTH_SIGN);
+    printf ("8S: %d\n", IPL_DEPTH_8S);
+    printf ("16S: %d\n", IPL_DEPTH_16S);
+    printf ("32S: %d\n", IPL_DEPTH_32S);
+    
     return 0;
 }

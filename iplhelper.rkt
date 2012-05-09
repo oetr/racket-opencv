@@ -30,17 +30,13 @@
      (_fun (num) :: (num : _int) -> _int)))
 
   (define t (get-ffi-obj "ipl_apply_fn"
-               (ffi-lib "../C-helper-functions/IplImage/liblibraryipl")
-               (_cprocedure
-                (list (_cprocedure (list _int)
-                                   _int)
-                      _pointer
-                      _int)
-                _void)))
+                         (ffi-lib "../C-helper-functions/IplImage/liblibraryipl")
+                         (_fun (_fun _int -> _int) _pointer _int -> _void)))
   
-  (time* (t (lambda (x) (- 255 x)) data (* width height channels)))
+  (time (t (lambda (x) (- 255 x)) data (* width height channels)))
   
   (cvShowImage "Main Window" img)
+  (cvDestroyWindow "Main Window")
 
   
    

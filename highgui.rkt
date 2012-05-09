@@ -55,13 +55,15 @@
 
 ;;; Procedures
   (define-opencv-highgui cvLoadImage
-    (_fun _string _int -> _pointer))
+    (_fun _string _int
+          -> (r : (_ptr io _IplImage))
+          -> (ptr-ref r _IplImage)))
   
   (define-opencv-highgui cvNamedWindow
     (_fun _string _int -> _int))
   
   (define-opencv-highgui cvShowImage
-    (_fun _string _pointer -> _void))
+    (_fun _string (_ptr i _IplImage) -> _void))
   
   (define-opencv-highgui cvDestroyWindow
     (_fun _string -> _void))
@@ -70,18 +72,43 @@
     (_fun _int -> _int))
 
   ;; Video Capture  
-  (define _CvCapture (make-ctype _pointer  #f #f))
-  
+  (define _CvCapture _pointer)
+
+  ;; start capturing frames from camera:
+  ;; index = camera_index + domain_offset (CV_CAP_*)
   (define-opencv-highgui cvCreateCameraCapture
-    (_fun _int -> _CvCapture))
-  
+    (_fun _int -> _pointer))
+  ;; an alias 
   (define cvCaptureFromCAM cvCreateCameraCapture)
 
+  ;; grab a frame, return 1 on success, 0 on fail.
+  ;; this function is thought to be fast
   (define-opencv-highgui cvGrabFrame
     (_fun _pointer -> _int))
 
+  ;; get the frame grabbed with cvGrabFrame(..)
+  ;; This function may apply some frame processing like
+  ;; frame decompression, flipping etc.
+  ;; !!!DO NOT RELEASE or MODIFY the retrieved frame!!!
   (define-opencv-highgui cvRetrieveFrame
     (_fun _pointer _int -> _pointer))
+  
+  ;; Just a combination of cvGrabFrame and cvRetrieveFrame
+  ;; !!!DO NOT RELEASE or MODIFY the retrieved frame!!!      */
+  (define-opencv-highgui cvQueryFrame
+    (_fun _pointer
+          -> (r : _pointer)
+          -> (ptr-ref r _IplImage)))
+
+  ;; ;; stop capturing/reading and free resources
+  ;; (get-ffi-obj "cvReleaseCapture"
+  ;;              (ffi-lib "/opt/local/lib/libopencv_highgui")               
+  ;;              (_cprocedure
+  ;;               (list (_cpointer (_cpointer _pointer)))
+  ;;               _void))
+
+  (define-opencv-highgui cvReleaseCapture
+    (_fun (_ptr i _pointer) -> _void))
 
 
   )

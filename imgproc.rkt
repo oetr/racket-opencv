@@ -23,4 +23,11 @@
   (define-opencv-imgproc cvDilate
     (_fun _pointer _pointer _pointer _int -> _void))
 
+
+  ;; Calculates an image derivative using generalized Sobel
+  ;; (aperture_size = 1,3,5,7) or Scharr (aperture_size = -1) operator.
+  ;; Scharr can be used only for the first dx or dy derivative */
+  (define-opencv-imgproc cvSobel
+    (_fun _pointer _pointer _int _int _int -> _void))
+
 )

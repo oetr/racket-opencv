@@ -81,7 +81,7 @@
   * is an extract from IPL headers.
   * Copyright (c) 1995 Intel Corporation.
   |#
-  (define IPL_DEPTH_SIGN #x80000000)
+  (define IPL_DEPTH_SIGN -2147483648)
 
   (define IPL_DEPTH_1U     1)
   (define IPL_DEPTH_8U     8)
@@ -115,6 +115,10 @@
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;               Image type (IplImage)                                 
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (define-cstruct _CvSize
+    ([width _int]
+     [height _int]))
+  
     (define-cstruct _CvRect
     ([x _int]
      [y _int]
@@ -146,7 +150,7 @@
      [imageId _pointer]
      [IplTileInfo _pointer]
      [imageSize _int]
-     [imageData _pointer]
+     [imageData (_cpointer _ubyte)]
      [widthStep _int]
      [BorderMode (_array _int 4)]
      [BorderConst (_array _int 4)]
