@@ -38,6 +38,9 @@ int main(int argc, char *argv[])
     printf ("8S: %d\n", IPL_DEPTH_8S);
     printf ("16S: %d\n", IPL_DEPTH_16S);
     printf ("32S: %d\n", IPL_DEPTH_32S);
+
+    printf ("cap: %d\n", CV_CAP_OPENNI_IMAGE_GENERATOR);
+    printf ("cv_fourcc: %d\n", CV_FOURCC('Z', 'Z', 'Z', 'Z'));
     
     return 0;
 }
