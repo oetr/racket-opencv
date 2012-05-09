@@ -7,9 +7,6 @@
   (define-ffi-definer define-opencv-highgui
     (ffi-lib "/opt/local/lib/libopencv_highgui"))
 
-  (define-ffi-definer define-opencv-core
-    (ffi-lib "/opt/local/lib/libopencv_core"))
-
   (define CvArr _void)
 
   (define-cstruct _CvScalar
@@ -75,7 +72,6 @@
   (define CV_GpuApiCallError  -217);; 
   (define CV_GpuNppCallError  -218);;
   (define CV_GpuCufftCallError  -219)
-
 
   (define CV_PI   3.1415926535897932384626433832795)
   (define CV_LOG2 0.69314718055994530941723212145818)
@@ -150,7 +146,7 @@
      [imageId _pointer]
      [IplTileInfo _pointer]
      [imageSize _int]
-     [imageData (_cpointer _bytes)]
+     [imageData _pointer]
      [widthStep _int]
      [BorderMode (_array _int 4)]
      [BorderConst (_array _int 4)]
@@ -170,3 +166,35 @@
      [anchorX  _int]
      [anchorY  _int]
      [values _pointer])))
+
+(define-cstruct _CvMat
+    ([type  _int]
+     [step  _int]
+     [refcount  (_cpointer _int)]
+     [hdr_refcount  _int]
+     [values _pointer]))
+
+)
+
+typedef struct CvMat
+{
+    int type;
+    int step;
+
+    /* for internal use only */
+    int* refcount;
+    int hdr_refcount;
+
+    union
+    {
+        uchar* ptr;
+        short* s;
+        int* i;
+        float* fl;
+        double* db;
+    } data;
+    int rows;
+    int cols;
+
+}
+CvMat;

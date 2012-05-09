@@ -32,11 +32,23 @@
         width height step channels)
 
 ;;; Get image data
-(define data (IplImage-imageData img))
+(define data (make-sized-byte-string (IplImage-imageData img)
+                                     (* width height channels)))
+(time (let loop ([i (- (* 640 480 3) 1)])
+        (when (>= i 0)
+          ;; invert each pixel channel-wise
+          (bytes-set! data i (- 255 (bytes-ref data i)))
+          (loop (- i 1)))))
+
 ;;(cvSetImageROI img (make-CvRect 100 100 200 200))
 
 (define (make-c-array size type)
   (define a (_array type size))
+  (define ptr (malloc type 'atomic))
+  (ptr-ref ptr a))
+
+(define (make-c-union type)
+  (define a (_union (_cpointer _ubyte) (_cpointer _float)))
   (define ptr (malloc type 'atomic))
   (ptr-ref ptr a))
 
