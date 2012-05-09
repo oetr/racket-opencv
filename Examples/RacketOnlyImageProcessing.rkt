@@ -7,6 +7,10 @@
 ;; Load an image and invert all pixel values
 ;; Using built-in Racket primitives
 
+;; TODO: Add interaction between opencv and racket:
+;;       manipulate image in opencv
+;;       visualize using Racket opengl
+
 ;;; Includes
 (require racket/system)
 (require racket/gui/base)
@@ -19,7 +23,7 @@
 (if (zero? (vector-length arguments))
   (begin
     (printf "provide image name~n")
-    (exit))    
+    (exit))
   (set! image-name (vector-ref arguments 0)))
 
 ;;; Load an image from the hard disk
@@ -49,10 +53,6 @@
                    [label "Main Window"]
                    [width W]
                    [height H]))
-
-(define GT-pen (make-object pen% "BLUE" 1 'solid))
-(define BD-pen (make-object pen% "ORANGE" 1 'solid))
-(define transparent-brush (make-object brush% "RED" 'transparent))
 
 (define canvas (new canvas% [parent frame]))
 (define dc (send canvas get-dc))
