@@ -9,10 +9,10 @@
 ;; Tested with iSight camera of my MacBook Pro
 
 ;;; Includes
-(require "../types.rkt")
-(require "../highgui.rkt")
-(require "../core.rkt")
-(require "../imgproc.rkt")
+(require "../src/types.rkt")
+(require "../src/highgui.rkt")
+(require "../src/core.rkt")
+(require "../src/imgproc.rkt")
 
 ;; Open video capture of camera 0
 (define capture (cvCaptureFromCAM 0))
@@ -43,21 +43,16 @@
   ;; so that we can display and modify it
   (cvCopy captured-image frame #f)
 
-  ;; Erode the original image with default kernel of 3x3 pixels 
-  ;;(cvDilate frame frame #f 3)
-
   ;; Sobel edge detection
   (cvSobel frame sobel-frame 2 0 7)
   
   ;; Show the frame on the screen
   (cvShowImage "Video Capture" sobel-frame)
   
-  ;; Wait for 1 ms for a key
-  (define key (cvWaitKey 1))
-  
+  ;; Wait for 1 ms for a key  
   ;; Break out from the loop if any key has been pressed
   ;; key = -1 if no key has been pressed
-  (unless (>= key 0)
+  (unless (>= (cvWaitKey 1) 0)
     (loop)))
 
 ;; Stop capture

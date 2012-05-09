@@ -15,10 +15,10 @@
 ;;; Includes
 (require ffi/unsafe)
 
-(require "../types.rkt")
-(require "../highgui.rkt")
-(require "../core.rkt")
-(require "../imgproc.rkt")
+(require "../src/types.rkt")
+(require "../src/highgui.rkt")
+(require "../src/core.rkt")
+(require "../src/imgproc.rkt")
 
 ;;; Load an image from the hard disk
 (define img (cvLoadImage "images/test.png" CV_LOAD_IMAGE_COLOR))
@@ -44,11 +44,11 @@
 
 ;;; IplImage manipulation using Racket bytes
 ;; convert data to bytestring
+;; TODO: make this conversion to Racket bytes automatically
+;; without the need to require ffi/unsafe library
 (define data
   (make-sized-byte-string (IplImage-imageData img)
                           (* width height channels)))
-;; TODO: make this conversion to Racket bytes automatically
-;; without the need to require ffi/unsafe library
 
 ;; Invert all pixel values
 ;; Slow image manipulation by using bytes
