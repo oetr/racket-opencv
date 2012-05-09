@@ -34,7 +34,7 @@
 ;;; Get image data
 (define data (make-sized-byte-string (IplImage-imageData img)
                                      (* width height channels)))
-(time (let loop ([i (- (* 640 480 3) 1)])
+(time 20 (let loop ([i (- (* 640 480 3) 1)])
         (when (>= i 0)
           ;; invert each pixel channel-wise
           (bytes-set! data i (- 255 (bytes-ref data i)))
@@ -58,7 +58,7 @@
 ;; (array-set! cvscalar 2 0.0)
 ;; (array-set! cvscalar 3 0.0)
 
-(cvErode img img #f 5)
+(time (cvErode img img #f 5))
 
 (printf "adds time: ~n")
 (time (cvAddS img (make-CvScalar cvscalar) img #f))

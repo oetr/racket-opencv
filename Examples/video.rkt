@@ -14,6 +14,8 @@
 
 (require "../types.rkt")
 (require "../highgui.rkt")
+(require "../core.rkt")
+(require "../imgproc.rkt")
 
 (define image2 #f)
 (define a (cvCaptureFromCAM 0))
@@ -21,7 +23,8 @@
 (let loop ()
   (cvGrabFrame a)
   (set! image2 (ptr-ref (cvRetrieveFrame a 0) _IplImage))
-  (cvShowImage "Video Capture" image2)  
+  (cvDilate image2 image2 #f 10)
+  (cvShowImage "Video Capture" image2)
   (define key (cvWaitKey 1))
   (unless (>= key 0)
     (loop)))

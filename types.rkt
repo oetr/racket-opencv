@@ -165,36 +165,36 @@
      [nRows  _int]
      [anchorX  _int]
      [anchorY  _int]
-     [values _pointer])))
-
-(define-cstruct _CvMat
-    ([type  _int]
-     [step  _int]
-     [refcount  (_cpointer _int)]
-     [hdr_refcount  _int]
      [values _pointer]))
 
-)
+  ;; (define-cstruct _CvMat
+  ;;   ([type  _int]
+  ;;    [step  _int]
+  ;;    [refcount  (_cpointer _int)]
+  ;;    [hdr_refcount  _int]
+  ;;    [values _pointer]))
 
-typedef struct CvMat
-{
-    int type;
-    int step;
+  )
 
-    /* for internal use only */
-    int* refcount;
-    int hdr_refcount;
+;; typedef struct CvMat
+;; {
+;;     int type;
+;;     int step;
 
-    union
-    {
-        uchar* ptr;
-        short* s;
-        int* i;
-        float* fl;
-        double* db;
-    } data;
-    int rows;
-    int cols;
+;;     /* for internal use only */
+;;     int* refcount;
+;;     int hdr_refcount;
 
-}
-CvMat;
+;;     union
+;;     {
+;;         uchar* ptr;
+;;         short* s;
+;;         int* i;
+;;         float* fl;
+;;         double* db;
+;;     } data;
+;;     int rows;
+;;     int cols;
+
+;; }
+;; CvMat;
