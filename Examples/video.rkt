@@ -35,10 +35,7 @@
 ;; because of the potential overflow
 (define sobel-frame (cvCreateImage size IPL_DEPTH_16S channels))
 
-(let loop ()
-  ;; Get a frame from the camera
-  (cvGrabFrame capture)
-  
+(let loop ()  
   ;; Store captured frame in IplImage format (do not edit this frame!)
   (set! captured-image (cvQueryFrame capture))
 
@@ -52,10 +49,10 @@
   ;; Sobel edge detection
   (cvSobel frame sobel-frame 2 0 7)
   
-  ;; Show the rame on the screen
+  ;; Show the frame on the screen
   (cvShowImage "Video Capture" sobel-frame)
   
-  ;; Wait for 1 ms for  a key
+  ;; Wait for 1 ms for a key
   (define key (cvWaitKey 1))
   
   ;; Break out from the loop if any key has been pressed
