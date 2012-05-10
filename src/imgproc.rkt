@@ -40,4 +40,16 @@
   ;; Converts input array pixels from one color space to another
   (define-opencv-imgproc cvCvtColor
     (_fun _pointer _pointer _int -> _void))
+
+  #| Calculates constraint image for corner detection
+   Dx^2 * Dyy + Dxx * Dy^2 - 2 * Dx * Dy * Dxy.
+  Applying threshold to the result gives coordinates of corners |#
+  (define-opencv-imgproc cvPreCornerDetect
+    (_fun _pointer _pointer _int -> _void))
+
+  ;; Harris corner detector:
+  ;; Calculates det(M) - k*(trace(M)^2),
+  ;; where M is 2x2 gradient covariation matrix for each pixel
+  (define-opencv-imgproc cvCornerHarris
+    (_fun _pointer _pointer _int _int _double -> _void))
 )
