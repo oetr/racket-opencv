@@ -10,28 +10,40 @@
 
 ;;; Includes
 (require "../src/types.rkt")
-(require "../src/highgui.rkt")
 (require "../src/core.rkt")
+(require "../src/highgui.rkt")
 (require "../src/imgproc.rkt")
 
+
 (define capture (cvCaptureFromCAM 0))
+
+;; Reduce image resolution to 640x480
+(define success? (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0))
+(set! success? (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0))
+
+;; Capture an image to get parameters
 (define captured-image (cvQueryFrame capture))
 
 ;; Get parameters from the captured image to initialize
 ;; copied images
-(define width (IplImage-width captured-image))
-(define height (IplImage-height captured-image))
-(define size (make-CvSize width height))
-(define depth (IplImage-depth captured-image))
+(define width    (IplImage-width captured-image))
+(define height   (IplImage-height captured-image))
+(define size     (make-CvSize width height))
+(define depth    (IplImage-depth captured-image))
 (define channels (IplImage-nChannels captured-image))
 
 ;; Init an IplImage to where captured images will be copied
 (define frame (cvCreateImage size depth channels))
+(printf "depth = ~a~n" depth)
+(define grey-frame (cvCreateImage size IPL_DEPTH_8U 1))
+
 
 (let loop ()  
   (set! captured-image (cvQueryFrame capture))
-  (cvCopy captured-image frame #f)
-  (cvShowImage "Video Capture" frame)  
+  (cvCvtColor captured-image grey-frame CV_BGR2GRAY)
+  ;;(cvCopy captured-image frame #f)
+  (cvCanny grey-frame grey-frame 10.0 30.0 3)
+  (cvShowImage "Video Capture" grey-frame)
   (unless (>= (cvWaitKey 1) 0)
     (loop)))
 

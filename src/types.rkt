@@ -186,6 +186,147 @@
   ;;    [hdr_refcount  _int]
   ;;    [values _pointer]))
 
+  ;; Image processing types
+  ;; Constants for color conversion
+  (define CV_BGR2BGRA    0)
+  (define CV_RGB2RGBA    CV_BGR2BGRA)
+
+  (define CV_BGRA2BGR    1)
+  (define CV_RGBA2RGB    CV_BGRA2BGR)
+
+  (define CV_BGR2RGBA    2)
+  (define CV_RGB2BGRA    CV_BGR2RGBA)
+
+  (define CV_RGBA2BGR    3)
+  (define CV_BGRA2RGB    CV_RGBA2BGR)
+
+  (define CV_BGR2RGB     4)
+  (define CV_RGB2BGR     CV_BGR2RGB)
+
+  (define CV_BGRA2RGBA   5)
+  (define CV_RGBA2BGRA   CV_BGRA2RGBA)
+
+  (define CV_BGR2GRAY    6)
+  (define CV_RGB2GRAY    7)
+  (define CV_GRAY2BGR    8)
+  (define CV_GRAY2RGB    CV_GRAY2BGR)
+  (define CV_GRAY2BGRA   9)
+  (define CV_GRAY2RGBA   CV_GRAY2BGRA)
+  (define CV_BGRA2GRAY   10)
+  (define CV_RGBA2GRAY   11)
+
+  (define CV_BGR2BGR565  12)
+  (define CV_RGB2BGR565  13)
+  (define CV_BGR5652BGR  14)
+  (define CV_BGR5652RGB  15)
+  (define CV_BGRA2BGR565 16)
+  (define CV_RGBA2BGR565 17)
+  (define CV_BGR5652BGRA 18)
+  (define CV_BGR5652RGBA 19)
+
+  (define CV_GRAY2BGR565 20)
+  (define CV_BGR5652GRAY 21)
+
+  (define CV_BGR2BGR555  22)
+  (define CV_RGB2BGR555  23)
+  (define CV_BGR5552BGR  24)
+  (define CV_BGR5552RGB  25)
+  (define CV_BGRA2BGR555 26)
+  (define CV_RGBA2BGR555 27)
+  (define CV_BGR5552BGRA 28)
+  (define CV_BGR5552RGBA 29)
+
+  (define CV_GRAY2BGR555 30)
+  (define CV_BGR5552GRAY 31)
+
+  (define CV_BGR2XYZ     32)
+  (define CV_RGB2XYZ     33)
+  (define CV_XYZ2BGR     34)
+  (define CV_XYZ2RGB     35)
+
+  (define CV_BGR2YCrCb   36)
+  (define CV_RGB2YCrCb   37)
+  (define CV_YCrCb2BGR   38)
+  (define CV_YCrCb2RGB   39)
+
+  (define CV_BGR2HSV     40)
+  (define CV_RGB2HSV     41)
+
+  (define CV_BGR2Lab     44)
+  (define CV_RGB2Lab     45)
+
+  (define CV_BayerBG2BGR 46)
+  (define CV_BayerGB2BGR 47)
+  (define CV_BayerRG2BGR 48)
+  (define CV_BayerGR2BGR 49)
+
+  (define CV_BayerBG2RGB CV_BayerRG2BGR)
+  (define CV_BayerGB2RGB CV_BayerGR2BGR)
+  (define CV_BayerRG2RGB CV_BayerBG2BGR)
+  (define CV_BayerGR2RGB CV_BayerGB2BGR)
+
+  (define CV_BGR2Luv     50)
+  (define CV_RGB2Luv     51)
+  (define CV_BGR2HLS     52)
+  (define CV_RGB2HLS     53)
+
+  (define CV_HSV2BGR     54)
+  (define CV_HSV2RGB     55)
+
+  (define CV_Lab2BGR     56)
+  (define CV_Lab2RGB     57)
+  (define CV_Luv2BGR     58)
+  (define CV_Luv2RGB     59)
+  (define CV_HLS2BGR     60)
+  (define CV_HLS2RGB     61)
+
+  (define CV_BayerBG2BGR_VNG 62)
+  (define CV_BayerGB2BGR_VNG 63)
+  (define CV_BayerRG2BGR_VNG 64)
+  (define CV_BayerGR2BGR_VNG 65)
+  
+  (define CV_BayerBG2RGB_VNG CV_BayerRG2BGR_VNG)
+  (define CV_BayerGB2RGB_VNG CV_BayerGR2BGR_VNG)
+  (define CV_BayerRG2RGB_VNG CV_BayerBG2BGR_VNG)
+  (define CV_BayerGR2RGB_VNG CV_BayerGB2BGR_VNG)
+  
+  (define CV_BGR2HSV_FULL  66)
+  (define CV_RGB2HSV_FULL  67)
+  (define CV_BGR2HLS_FULL  68)
+  (define CV_RGB2HLS_FULL  69)
+  
+  (define CV_HSV2BGR_FULL  70)
+  (define CV_HSV2RGB_FULL  71)
+  (define CV_HLS2BGR_FULL  72)
+  (define CV_HLS2RGB_FULL  73)
+  
+  (define CV_LBGR2Lab      74)
+  (define CV_LRGB2Lab      75)
+  (define CV_LBGR2Luv      76)
+  (define CV_LRGB2Luv      77)
+  
+  (define CV_Lab2LBGR      78)
+  (define CV_Lab2LRGB      79)
+  (define CV_Luv2LBGR      80)
+  (define CV_Luv2LRGB      81)
+  
+  (define CV_BGR2YUV       82)
+  (define CV_RGB2YUV       83)
+  (define CV_YUV2BGR       84)
+  (define CV_YUV2RGB       85)
+  
+  (define CV_BayerBG2GRAY  86)
+  (define CV_BayerGB2GRAY  87)
+  (define CV_BayerRG2GRAY  88)
+  (define CV_BayerGR2GRAY  89)
+
+  (define CV_YUV420i2RGB   90)
+  (define CV_YUV420i2BGR   91)
+  (define CV_YUV420sp2RGB  92)
+  (define CV_YUV420sp2BGR  93)
+  
+  (define CV_COLORCVT_MAX  10)
+
   )
 
 ;; typedef struct CvMat

@@ -33,4 +33,11 @@
   (define-opencv-imgproc cvSobel
     (_fun _pointer _pointer _int _int _int -> _void))
 
+    ;; Runs canny edge detector
+  (define-opencv-imgproc cvCanny
+    (_fun _pointer _pointer _double _double _int -> _void))
+
+  ;; Converts input array pixels from one color space to another
+  (define-opencv-imgproc cvCvtColor
+    (_fun _pointer _pointer _int -> _void))
 )
