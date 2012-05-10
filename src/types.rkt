@@ -7,11 +7,13 @@
   (define-ffi-definer define-opencv-highgui
     (ffi-lib "/opt/local/lib/libopencv_highgui"))
 
+  #| CvArr* is used to pass arbitrary
+  * array-like data structures
+  * into functions where the particular
+  * array type is recognized at runtime:
+  |#
   (define CvArr _void)
-
-  (define-cstruct _CvScalar
-    ([val (_array _double 4)]))
-
+    
   (define-cstruct _Cv32suf ([i _int]
                             [u _uint]
                             [f _float]))
@@ -19,7 +21,7 @@
   (define-cstruct _Cv64suf ([i _int64]
                             [u _uint64]
                             [f _double]))
-
+  
   (define CVStatus _int)
   (define CV_StsOk   0 );; everything is ok
   (define CV_StsBackTrace  -1);;   pseudo error for back trace  
@@ -73,9 +75,21 @@
   (define CV_GpuNppCallError  -218);;
   (define CV_GpuCufftCallError  -219)
 
+  #|************************************************************************
+  *                             Common macros and inline functions          
+  \************************************************************************|#
+  ;; TODO : port inlined functions in case they are needed
   (define CV_PI   3.1415926535897932384626433832795)
   (define CV_LOG2 0.69314718055994530941723212145818)
 
+  #|*************** Random number generation *******************|#
+  ;; Use Racket's internal functions for rn generations
+
+  
+  #|*********************************************************************
+  *                                  Image type (IplImage)              *
+  \**********************************************************************|#
+  
   #|*
   * The following definitions (until #endif)
   * is an extract from IPL headers.
@@ -115,20 +129,6 @@
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;               Image type (IplImage)                                 
   ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (define-cstruct _CvPoint
-    ([x _int]
-     [y _int]))
-  
-  (define-cstruct _CvSize
-    ([width _int]
-     [height _int]))
-  
-    (define-cstruct _CvRect
-    ([x _int]
-     [y _int]
-     [width _int]
-     [height _int]))
-
   (define-cstruct _IplROI
     ([coi _int] ;;0 - no COI (all channels are selected), 1 - 0th channel is selected 
      [xOffset _int]
@@ -179,6 +179,315 @@
      [anchorY  _int]
      [values _pointer]))
 
+  (define IPL_IMAGE_HEADER 1)
+  (define IPL_IMAGE_DATA   2)
+  (define IPL_IMAGE_ROI    4)
+
+  #| extra border mode |#
+  (define IPL_BORDER_REFLECT_101    4)
+  (define IPL_BORDER_TRANSPARENT    5)
+  (define CV_TYPE_NAME_IMAGE "opencv-image")
+
+  #| for storing double-precision
+  floating point data in IplImage's |#
+  (define IPL_DEPTH_64F  64)
+
+  #|****************************************************************
+  *                       Matrix type (CvMat)                      *
+  \*****************************************************************|#
+  ;; TODO : port CvMat later
+
+
+  #|/**********************************************************************
+  *                       Multi-dimensional dense array (CvMatND)         *
+  \**********************************************************************|#
+  ;; TODO : port later
+
+  #|/**********************************************************************
+  *                       Multi-dimensional sparse array (CvSparseMat)    *
+  \**********************************************************************|#
+  ;; TODO : port later
+
+  #|************************************************************
+  *                                         Histogram          *
+  \************************************************************|#
+
+  #|/******************************************************
+  *          Other supplementary data type definitions    *
+  \*******************************************************|#
+  
+  #|************************************ CvRect *******************|#
+  (define-cstruct _CvRect
+    ([x _int]
+     [y _int]
+     [width _int]
+     [height _int]))
+
+  (define (cvRectRoRoi rect coi)
+    (make-IplROI coi
+                 (CvRect-x rect)
+                 (CvRect-y rect)
+                 (CvRect-width rect)
+                 (CvRect-height rect)))
+
+  (define (cvROIToRect roi)
+    (make-CvRect (IplROI-xOffset roi)
+                 (IplROI-yOffset roi)
+                 (IplROI-width roi)
+                 (IplROI-height roi)))
+
+  #|******************* CvTermCriteria ***********************************|#
+  (define CV_TERMCRIT_ITER    1)
+  (define CV_TERMCRIT_NUMBER  CV_TERMCRIT_ITER)
+  (define CV_TERMCRIT_EPS     2)
+
+  (define-cstruct _CvTermCriteria
+    #| may be combination of
+    CV_TERMCRIT_ITER
+    CV_TERMCRIT_EPS |#
+    ([type _int]
+     [max_iter _int]
+     [epsilon _double]))
+
+  (define cvTermCriteria make-CvTermCriteria)
+
+  #|****************** CvPoint and variants *******************************|#
+  (define-cstruct _CvPoint
+    ([x _int]
+     [y _int]))
+
+  (define cvPoint make-CvPoint)
+
+  (define-cstruct _CvPoint2D32f
+    ([x _float]
+     [y _float]))
+
+  (define-cstruct _CvPoint3D32f
+    ([x _float]
+     [y _float]
+     [z _float]))
+  
+  (define-cstruct _CvPoint2D64f
+    ([x _double]
+     [y _double]))
+
+  (define-cstruct _CvPoint3D64f
+    ([x _double]
+     [y _double]
+     [z _double]))
+
+  #|************************** CvSize's & CvBox *********************|#
+  (define-cstruct _CvSize
+    ([width _int]
+     [height _int]))
+
+  (define-cstruct _CvSize2D32f
+    ([width _float]
+     [height _float]))
+
+  (define-cstruct _CvBox2D
+    ([center _CvPoint2D32f] ;; Center of the box.
+     [size _CvSize2D32f]    ;; Box width and length
+     [angle _float]))       ;; Angle between the horizontal axis
+  ;; and the first side (i.e. length) in degrees
+
+  (define-cstruct _CvLineIterator
+    ;; Pointer to the current point:
+    ([ptr _pointer]
+     ;; Bresenham algorithm state:
+     [err _int]
+     [plus_delta _int]
+     [minus_delta _int]
+     [plus_step _int]
+     [minus_step _int]))
+
+  #|********************** CvSlice **********************|#
+  (define-cstruct _CvSlice
+    ([start_index _int]
+     [end_index _int]))
+
+  (define CV_WHOLE_SEQ_END_INDEX #x3fffffff)
+  (define CV_WHOLE_SEQ  (make-CvSlice 0 CV_WHOLE_SEQ_END_INDEX))
+
+  #|******************** CvScalar **********************|#
+  ;; TODO : make the function easier, to one that accepts 4 arguments 
+  (define-cstruct _CvScalar
+    ([val (_array _double 4)]))
+
+  #|***************************************************
+  *              Dynamic Data structures              *
+  \***************************************************|#
+
+  #|******************************* Memory storage *********************|#
+  (define-cstruct _CvMemBlock
+    ([prev _pointer]
+     [next _pointer]))
+  
+  (define CV_STORAGE_MAGIC_VAL    #x42890000)
+  
+  (define-cstruct _CvMemStorage
+    ([signature _int]
+     [bottom _pointer] #| First allocated block.                   |#
+     [top _pointer] #| Current memory block - top of the stack. |#
+     [parent _pointer] #| We get new blocks from parent as needed. |#
+     [block_size _pointer] #| Block size.                              |#
+     [free_space _pointer])) #| Remaining free space in current block.   |#
+
+  (define-cstruct _CvMemStoragePos
+    ([top _pointer]
+     [free_space _int]))
+
+  #|************************** Sequence *********************|#
+  (define-cstruct _CvSeqBlock
+    ([prev _pointer] #| Previous sequence block.   |#
+     [next _pointer] #| Next sequence block.       |#
+     [start_index _int] #| Index of the first element in the block +  |#
+     #| sequence->first->start_index.              |#
+     [count _int] #| Number of elements in the block.           |#
+     [data _pointer])) #| Pointer to the first element of the block. |#
+
+  #|
+  Read/Write sequence.
+  Elements can be dynamically inserted to or deleted from the sequence.
+  |#
+  (define-cstruct _CvSeq
+    ([flags _int]           #| Miscellaneous flags.                 |#
+     [header_size _int]     #| Size of sequence header.             |#
+     [h_prev _pointer]      #| Previous sequence.                   |#
+     [h_next _pointer]      #| Next sequence.                       |#
+     [v_prev _pointer]      #| 2nd previous sequence.               |#
+     [v_next _pointer]      #| 2nd next sequence.                   |#
+     [total _int]           #| Total number of elements.            |#
+     [elem_size _int]       #| Size of sequence element in bytes.   |#
+     [block_max _pointer]   #| Maximal bound of the last block.     |#
+     [ptr _pointer]         #| Current write pointer.               |#
+     [delta_elems _int]     #| Grow seq this many at a time.        |#
+     [storage _pointer]     #| Where the seq is stored.             |#
+     [free_blocks _pointer] #| Free blocks list.                    |#
+     [first _pointer]))     #| Pointer to the first sequence block. |#
+
+  (define CV_TYPE_NAME_SEQ             "opencv-sequence")
+  (define CV_TYPE_NAME_SEQ_TREE        "opencv-sequence-tree")
+
+  #|************************* Set **************************|#
+  #|
+  Set.
+  Order is not preserved. There can be gaps between sequence elements.
+  After the element has been inserted it stays in the same place all the time.
+  The MSB(most-significant or sign bit) of the first field (flags)
+  is 0 iff the element exists.
+  |#
+  (define-cstruct _CvSetElem
+    ([flags _int]
+     [next_free _pointer]))
+
+
+  #|
+  Read/Write sequence.
+  Elements can be dynamically inserted to or deleted from the sequence.
+  |#
+  (define-cstruct _CvSet
+    ([flags _int]
+     [header_size _int]
+     [h_prev _pointer]
+     [h_next _pointer]
+     [v_prev _pointer]
+     [v_next _pointer]
+     [total _int]
+     [elem_size _int]
+     [block_max _pointer]
+     [ptr _pointer]
+     [delta_elems _int]
+     [storage _int]
+     [free_blocks _int]
+     [first _int]
+     [free_elems _pointer]
+     [active_count _int]))
+
+  ;; CV_SET_FIELDS
+  ;; int       flags;             #| Miscellaneous flags.     |#      
+  ;; int       header_size;       #| Size of sequence header. |#      
+  ;; struct    node_type* h_prev; #| Previous sequence.       |#      
+  ;; struct    node_type* h_next; #| Next sequence.           |#      
+  ;; struct    node_type* v_prev; #| 2nd previous sequence.   |#      
+  ;; struct    node_type* v_next  #| 2nd next sequence.       |#
+  ;; int       total;          #| Total number of elements.            |#  
+  ;; int       elem_size;      #| Size of sequence element in bytes.   |#  
+  ;; schar*    block_max;      #| Maximal bound of the last block.     |#  
+  ;; schar*    ptr;            #| Current write pointer.               |#  
+  ;; int       delta_elems;    #| Grow seq this many at a time.        |#  
+  ;; CvMemStorage* storage;    #| Where the seq is stored.             |#  
+  ;; CvSeqBlock* free_blocks;  #| Free blocks list.                    |#  
+  ;; CvSeqBlock* first;        #| Pointer to the first sequence block. |#
+
+  (define CV_SET_ELEM_IDX_MASK   (- (expt 2 26) 1))
+
+
+  #|************************************ Graph ****************************|#
+
+#|
+  We represent a graph as a set of vertices.
+  Vertices contain their adjacency lists (more exactly, pointers to first incoming or
+  outcoming edge (or 0 if isolated vertex)). Edges are stored in another set.
+  There is a singly-linked list of incoming/outcoming edges for each vertex.
+
+  Each edge consists of
+
+     o   Two pointers to the starting and ending vertices
+         (vtx[0] and vtx[1] respectively).
+
+   A graph may be oriented or not. In the latter case, edges between
+   vertex i to vertex j are not distinguished during search operations.
+
+     o   Two pointers to next edges for the starting and ending vertices, where
+         next[0] points to the next edge in the vtx[0] adjacency list and
+         next[1] points to the next edge in the vtx[1] adjacency list.
+|#
+(define-cstruct _CvGraphEdge
+  ([flags _int]
+   [weight _float]
+   [next _pointer]
+   [vtx _pointer]))
+
+(define-cstruct _CvGraphVtx
+  ([flags _int]
+   [first _pointer]))
+
+(define-cstruct _CvGraphVtx2D
+  ([flags _int]
+   [first _pointer]
+   [ptr (_cpointer _CvPoint2D32f)]))
+
+#|
+   Graph is "derived" from the set (this is set a of vertices)
+   and includes another set (edges)
+|#
+(define-cstruct _CvGraph
+  ([flags _int]
+   [header_size _int]
+   [h_prev _pointer]
+   [h_next _pointer]
+   [v_prev _pointer]
+   [v_next _pointer]
+   [total _int]
+   [elem_size _int]
+   [block_max _pointer]
+   [ptr _pointer]
+   [delta_elems _int]
+   [storage _int]
+   [free_blocks _int]
+   [first _int]
+   [free_elems _pointer]
+   [active_count _int]
+   [edges (_cpointer _CvSet)]))
+
+(define CV_TYPE_NAME_GRAPH "opencv-graph")
+
+
+
+  
+  
+
   ;; (define-cstruct _CvMat
   ;;   ([type  _int]
   ;;    [step  _int]
@@ -186,6 +495,18 @@
   ;;    [hdr_refcount  _int]
   ;;    [values _pointer]))
 
+
+  ;;; *********************************************************
+  ;;;                  Image processing types
+  ;;; *********************************************************
+  #| Connected component structure |#
+  (define-cstruct _CvConnectedComp
+    ([area _double]#| area of the connected component  |#
+     [value _CvScalar] #| average color of the connected component |#
+     [rect _CvRect] #| ROI of the component  |#
+     [contour _pointer]))#| optional component boundary
+  (the contour might have child contours corresponding to the holes)|#
+  
   ;; Image smooth methods
   (define CV_BLUR_NO_SCALE 0)
   (define CV_BLUR  1)
@@ -193,7 +514,17 @@
   (define CV_MEDIAN 3)
   (define CV_BILATERAL 4)
 
-  ;; Image processing types
+  #| Filters used in pyramid decomposition |#
+  (define CV_GAUSSIAN_5x5  7)
+
+  #| Inpainting algorithms |#
+  (define CV_INPAINT_NS      0)
+  (define CV_INPAINT_TELEA   1)
+
+  #| Special filters |#
+  (define CV_SCHARR -1)
+  (define CV_MAX_SOBEL_KSIZE 7)
+
   ;; Constants for color conversion
   (define CV_BGR2BGRA    0)
   (define CV_RGB2RGBA    CV_BGR2BGRA)
@@ -332,29 +663,261 @@
   (define CV_YUV420sp2RGB  92)
   (define CV_YUV420sp2BGR  93)
   
-  (define CV_COLORCVT_MAX  10)
+  (define CV_COLORCVT_MAX  100)
 
+  #| Sub-pixel interpolation methods |#
+  (define CV_INTER_NN        0)
+  (define CV_INTER_LINEAR    1)
+  (define CV_INTER_CUBIC     2)
+  (define CV_INTER_AREA      3)
+  (define CV_INTER_LANCZOS4  4)
+
+  #| ... and other image warping flags |#
+  (define CV_WARP_FILL_OUTLIERS 8)
+  (define CV_WARP_INVERSE_MAP  16)
+
+  #| Shapes of a structuring element for morphological operations |#
+  (define CV_SHAPE_RECT      0)
+  (define CV_SHAPE_CROSS     1)
+  (define CV_SHAPE_ELLIPSE   2)
+  (define CV_SHAPE_CUSTOM    100)
+
+  #| Morphological operations |#
+  (define CV_MOP_ERODE        0)
+  (define CV_MOP_DILATE       1)
+  (define CV_MOP_OPEN         2)
+  (define CV_MOP_CLOSE        3)
+  (define CV_MOP_GRADIENT     4)
+  (define CV_MOP_TOPHAT       5)
+  (define CV_MOP_BLACKHAT     6)
+
+  #| Spatial and central moments |#
+  (define-cstruct _CvMoments
+    ;; spatial moments
+    ([m00 _double][m10 _double][m01 _double][m20 _double]
+     [m11 _double][m02 _double][m30 _double][m21 _double]
+     [m12 _double][m03 _double]
+     ;; central moments
+     [mu20 _double][mu11 _double][mu02 _double][mu30 _double]
+     [mu21 _double][mu12 _double][mu03 _double]
+     [inv_sqrt_m00 _double])) ;; m00 != 0 ? 1/sqrt(m00) : 0
+
+  #| Hu invariants |#
+  (define-cstruct _CvHuMoments
+    #| Hu invariants |#
+    ([hu1 _double]
+     [hu2 _double]
+     [hu3 _double]
+     [hu4 _double]
+     [hu5 _double]
+     [hu6 _double]
+     [hu7 _double]))
+
+  #| Template matching methods |#
+  (define CV_TM_SQDIFF         0)
+  (define CV_TM_SQDIFF_NORMED  1)
+  (define CV_TM_CCORR          2)
+  (define CV_TM_CCORR_NORMED   3)
+  (define CV_TM_CCOEFF         4)
+  (define CV_TM_CCOEFF_NORMED  5)
+
+  (define _CvDistanceFunction
+    (_fun _pointer _pointer _pointer -> _float))
+
+  #| Contour retrieval modes |#
+  (define CV_RETR_EXTERNAL 0)
+  (define CV_RETR_LIST 1)
+  (define CV_RETR_CCOMP 2)
+  (define CV_RETR_TREE 3)
+
+  #| Contour approximation methods |#
+  (define CV_CHAIN_CODE 0)
+  (define CV_CHAIN_APPROX_NONE 1)
+  (define CV_CHAIN_APPROX_SIMPLE 2)
+  (define CV_CHAIN_APPROX_TC89_L1 3)
+  (define CV_CHAIN_APPROX_TC89_KCOS 4)
+  (define CV_LINK_RUNS 5)
+
+  #|*
+  Internal structure that is used for sequental retrieving contours from the image.
+  It supports both hierarchical and plane variants of Suzuki algorithm.
+  |#
+  (define _CvContourScanner _pointer)
+
+  ;; CV_SEQ_WRITER_FIELDS
+  ;; [header_size _int] 
+  ;; [seq _pointer] #| the sequence written |#
+  ;; [block _pointer] #| current block |#
+  ;; [ptr _pointer] #| pointer to free space |#
+  ;; [block_min _pointer] #| pointer to the beginning of block|#
+  ;; [header_block_max _pointer]#| pointer to the end of block |#
+
+  #| Freeman chain reader state |#
+  (define-cstruct _CvChainPtReader
+    ([header_size _int] 
+     [seq _pointer] #| the sequence written |#
+     [block _pointer] #| current block |#
+     [ptr _pointer] #| pointer to free space |#
+     [block_min _pointer] #| pointer to the beginning of block|#
+     [header_block_max _pointer]#| pointer to the end of block |#
+     [code _ubyte]
+     [pt _CvPoint]
+     [deltas (_array (_array _sbyte 2) 8)]))
+
+  ;; TODO : port this code if needed
+  ;; (define (CV_INIT_3x3_DELTAS deltas step nch)
+  ;;   (set! ))
+  #| initializes 8-element array for fast access to 3x3 neighborhood of a pixel |#
+  ;; #define  CV_INIT_3X3_DELTAS( deltas, step, nch )            \
+  ;;     ((deltas)[0] =  (nch),  (deltas)[1] = -(step) + (nch),  \
+  ;;      (deltas)[2] = -(step), (deltas)[3] = -(step) - (nch),  \
+  ;;      (deltas)[4] = -(nch),  (deltas)[5] =  (step) - (nch),  \
+  ;;      (deltas)[6] =  (step), (deltas)[7] =  (step) + (nch))
+
+  #|***************************************************************************
+  *                              Planar subdivisions                          *
+  *****************************************************************************|#
+  (define size_t _uint)
+  (define _CvSubdiv2DEdge size_t)
+
+  ;;CV_QUADEDGE2D_FIELDS()
+  ;; [flags _int]
+  ;; [pt (_array _CvSubdiv2DPoint 4)]
+  ;; [next (_array _CvSubdiv2DEdge 4)]
+
+  ;; CV_SUBDIV2D_POINT_FIELDS()
+  ;; [flags _int]
+  ;; [first _CvSubdiv2DEdge]
+  ;; [pt _CvPoint2D32f]
+  ;; [id _int]
+
+  (define CV_SUBDIV2D_VIRTUAL_POINT_FLAG (expt 2 30))
+
+  (define-cstruct _CvSubdiv2DPoint
+    ([flags _int]
+     [first _CvSubdiv2DEdge]
+     [pt _CvPoint2D32f]
+     [id _int]))
+
+  (define-cstruct _CvQuadEdge2D
+    ([flags _int]
+     [pt (_array _CvSubdiv2DPoint 4)]
+     [next (_array _CvSubdiv2DEdge 4)]))
+
+
+  (define-cstruct _CvSubdiv2D
+    ([flags _int]
+     [pt (_array _CvSubdiv2DPoint 4)]
+     [next (_array _CvSubdiv2DEdge 4)]
+     [quad_edges _int]
+     [is_geometry_valid _int]
+     [recent_edge _CvSubdiv2DEdge]
+     [topleft  _CvPoint2D32f]
+     [bottomright  _CvPoint2D32f]))
+
+
+  (define _CvSubdiv2DPointLocation
+    (_enum
+     '(CV_PTLOC_ERROR = -2
+       CV_PTLOC_OUTSIDE_RECT = -1
+       CV_PTLOC_INSIDE = 0
+       CV_PTLOC_VERTEX = 1
+       CV_PTLOC_ON_EDGE = 2)))
+  
+  (define _CvNextEdgeType
+    (_enum
+     '(CV_NEXT_AROUND_ORG   = #x00
+       CV_NEXT_AROUND_DST   = #x22
+       CV_PREV_AROUND_ORG   = #x11
+       CV_PREV_AROUND_DST   = #x33
+       CV_NEXT_AROUND_LEFT  = #x13
+       CV_NEXT_AROUND_RIGHT = #x31
+       CV_PREV_AROUND_LEFT  = #x20
+       CV_PREV_AROUND_RIGHT = #x02)))
+
+  ;; TODO : implement in Racket if necessary
+  #| get the next edge with the same origin point (counterwise) |#
+  ;; #(define  CV_SUBDIV2D_NEXT_EDGE( edge )  (((CvQuadEdge2D*)((edge) & ~3))->next[(edge)&3])
+
+  #| Contour approximation algorithms |#
+  (define CV_POLY_APPROX_DP 0)
+
+  #| Shape matching methods |#
+  (define CV_CONTOURS_MATCH_I1  1)
+  (define CV_CONTOURS_MATCH_I2  2)
+  (define CV_CONTOURS_MATCH_I3  3)
+
+  #| Shape orientation |#
+  (define CV_CLOCKWISE         1)
+  (define CV_COUNTER_CLOCKWISE 2)
+
+
+  #| Convexity defect |#
+  (define-cstruct _CvConvexityDefect
+    #| point of the contour where the defect begins |#
+    ([start _pointer]
+     #| point of the contour where the defect ends |#
+     [end (_cpointer _CvPoint)] 
+     #| the farthest from the convex hull point within the defect |#
+     [depth_point (_cpointer _CvPoint)]
+     #| distance between the farthest point and the convex hull |#
+     [depth _float]))
+
+  #| Histogram comparison methods |#
+  (define CV_COMP_CORREL        0)
+  (define CV_COMP_CHISQR        1)
+  (define CV_COMP_INTERSECT     2)
+  (define CV_COMP_BHATTACHARYYA 3)
+
+  #| Mask size for distance transform |#
+  (define CV_DIST_MASK_3   3)
+  (define CV_DIST_MASK_5   5)
+  (define CV_DIST_MASK_PRECISE 0)
+
+  #| Distance types for Distance Transform and M-estimators |#
+  (define CV_DIST_USER    -1)  #| User defined distance |#
+  (define CV_DIST_L1      1)   #| distance = |x1-x2| + |y1-y2| |#
+  (define CV_DIST_L2      2)   #| the simple euclidean distance |#
+  (define CV_DIST_C       3)   #| distance = max(|x1-x2||y1-y2|) |#
+  (define CV_DIST_L12     4)   #| L1-L2 metric: distance = 2(sqrt(1+x*x/2) - 1)) |#
+  (define CV_DIST_FAIR    5)   #| distance = c^2(|x|/c-log(1+|x|/c)) c = 1.3998 |#
+  (define CV_DIST_WELSCH  6)   #| distance = c^2/2(1-exp(-(x/c)^2)) c = 2.9846 |#
+  (define CV_DIST_HUBER   7)    #| distance = |x|<c ? x^2/2 : c(|x|-c/2) c=1.345 |#
+
+
+
+  #| Threshold types |#
+  (define CV_THRESH_BINARY      0)  #| value = value > threshold ? max_value : 0 |#
+  (define CV_THRESH_BINARY_INV  1)  #| value = value > threshold ? 0 : max_value  |#
+  (define CV_THRESH_TRUNC       2)  #| value = value > threshold ? threshold : value|#
+  (define CV_THRESH_TOZERO      3)  #| value = value > threshold ? value : 0  |#
+  (define CV_THRESH_TOZERO_INV  4)  #| value = value > threshold ? 0 : value  |#
+  (define CV_THRESH_MASK        7)
+  (define CV_THRESH_OTSU        8)  #| use Otsu algorithm to choose
+  the optimal threshold value
+  combine the flag with one of the above CV_THRESH_* values |#
+
+
+  #| Adaptive threshold methods |#
+  (define CV_ADAPTIVE_THRESH_MEAN_C  0)
+  (define CV_ADAPTIVE_THRESH_GAUSSIAN_C  1)
+
+
+  #| FloodFill flags |#
+  (define CV_FLOODFILL_FIXED_RANGE (expt 2 16))
+  (define CV_FLOODFILL_MASK_ONLY   (expt 2 17))
+
+
+
+  #| Canny edge detector flags |#
+  (define CV_CANNY_L2_GRADIENT  (- (expt 2 31)))
+
+
+  #| Variants of a Hough transform |#
+  (define CV_HOUGH_STANDARD 0)
+  (define CV_HOUGH_PROBABILISTIC 1)
+  (define CV_HOUGH_MULTI_SCALE 2)
+  (define CV_HOUGH_GRADIENT 3)
+
+  
   )
-
-;; typedef struct CvMat
-;; {
-;;     int type;
-;;     int step;
-
-;;     /* for internal use only */
-;;     int* refcount;
-;;     int hdr_refcount;
-
-;;     union
-;;     {
-;;         uchar* ptr;
-;;         short* s;
-;;         int* i;
-;;         float* fl;
-;;         double* db;
-;;     } data;
-;;     int rows;
-;;     int cols;
-
-;; }
-;; CvMat;
