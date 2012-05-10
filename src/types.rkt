@@ -186,6 +186,13 @@
   ;;    [hdr_refcount  _int]
   ;;    [values _pointer]))
 
+  ;; Image smooth methods
+  (define CV_BLUR_NO_SCALE 0)
+  (define CV_BLUR  1)
+  (define CV_GAUSSIAN  2)
+  (define CV_MEDIAN 3)
+  (define CV_BILATERAL 4)
+
   ;; Image processing types
   ;; Constants for color conversion
   (define CV_BGR2BGRA    0)

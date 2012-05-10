@@ -18,8 +18,8 @@
 (define capture (cvCaptureFromCAM 0))
 
 ;; Reduce image resolution to 640x480
-;; (define success? (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0))
-;; (set! success? (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0))
+(define success? (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0))
+(set! success? (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0))
 
 ;; Capture an image to get parameters
 (define captured-image (cvQueryFrame capture))
@@ -49,7 +49,9 @@
   ;; (cvDilate grey-frame grey-frame #f 1)
   ;; (cvCanny grey-frame grey-frame 30.0 30.0 3)
   ;; (cvCanny grey-frame grey-frame 100.0 100.0 3)
-  (cvCornerHarris grey-frame corners 11 15 0.9)
+  ;;(cvErode grey-frame grey-frame #f 10)
+  ;;(cvSmooth grey-frame grey-frame CV_GAUSSIAN 5 5 0.0 0.0)
+  (cvCornerHarris grey-frame corners 5 7 0.001)
   (cvShowImage "Video Capture" corners)
   (unless (>= (cvWaitKey 1) 0)
     (loop)))

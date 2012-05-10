@@ -12,9 +12,39 @@
 
   (require "types.rkt")
 
+  ;; TODO: describe functions with comments, not names?
+  ;; *************** Background statistics accumulation ***********
+  ;;  Adds image to accumulator
+  (define-opencv-imgproc cvAcc
+    (_fun (image : _pointer) (sum : _pointer) (mask : _pointer)
+          -> _void))
+
+  ;;  Adds squared image to accumulator
+  (define-opencv-imgproc cvSquareAcc
+    (_fun (image : _pointer) (sqsum : _pointer) (mask : _pointer)
+          -> _void))
+
+  ;;  Adds a product of two images to accumulator
+  (define-opencv-imgproc cvMultiplyAcc
+    (_fun (image1 : _pointer) (image2 : _pointer) (acc : _pointer)
+          (mask : _pointer)
+          -> _void))
+
+  ;;  Adds image to accumulator with weights:
+  ;; acc = acc*(1-alpha) + image*alpha
+  (define-opencv-imgproc cvRunningAvg
+    (_fun (image : _pointer) (acc : _pointer) (alpha : _double)
+          (mask : _pointer)
+          -> _void))
+
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;;; Image processing procedures
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ;; Smoothes array (removes noise)
+  (define-opencv-imgproc cvSmooth
+    (_fun (src : _pointer) (dst : _pointer) (smoothtype : _int) (size1 : _int)
+          (size2 : _int) (sigma1 : _double) (sigma2 : _double) -> _void))
 
   
   ;; Erodes input image (applies minimum filter) one or more times.
