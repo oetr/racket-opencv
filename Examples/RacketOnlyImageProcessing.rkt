@@ -12,9 +12,9 @@
 ;;       visualize using Racket opengl
 
 ;;; Includes
-(require racket/system)
-(require racket/gui/base)
-(require racket/draw)
+(require racket/system
+         racket/gui/base
+         racket/draw)
 
 ;;; Get image name from command line arguments
 (define arguments (current-command-line-arguments))
