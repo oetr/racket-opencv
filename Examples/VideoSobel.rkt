@@ -32,7 +32,7 @@
 
 ;; Init an IplImage to store results of sobel edge detection
 ;; it must have a higher bit width than 8U of the original image
-;; because of the potential overflow
+;; because of potential overflow
 (define sobel-frame (cvCreateImage size IPL_DEPTH_16S channels))
 
 (let loop ()  

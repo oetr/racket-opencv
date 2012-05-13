@@ -1,10 +1,6 @@
 This project ports a subset of the OpenCV C library to Racket by using the [[http://docs.racket-lang.org/foreign/index.html?q=ctype&q=_cpointer&q=make-cvector&q=time*&q=time&q=yield][Racket Foreign Interface]].
 Names of OpenCV structures and functions have been left unchanged, i.e., C function cvCaptureFromCAM(int index) can be used in Racket as (cvCaptureFromCAM index).
 
-* Supported Subset
-- IplImage: load and visualize images
-- Video: grab images from a camera
-- Image processing: erosion, dilation, sobel edge detection
 
 * Reference System
 - Mac OS X 10.7.3

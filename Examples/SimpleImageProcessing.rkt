@@ -13,12 +13,12 @@
 ;; and the book "Learning OpenCV" by Bradski and Kaehler, 2008
 
 ;;; Includes
-(require ffi/unsafe)
 
-(require "../src/types.rkt")
-(require "../src/highgui.rkt")
-(require "../src/core.rkt")
-(require "../src/imgproc.rkt")
+
+(require "../src/types.rkt"
+         "../src/highgui.rkt"
+         "../src/core.rkt"
+         "../src/imgproc.rkt")
 
 ;;; Load an image from the hard disk
 (define img (cvLoadImage "images/test.png" CV_LOAD_IMAGE_COLOR))
@@ -43,13 +43,14 @@
 (cvSetImageROI img (make-CvRect 0 0 width height))
 
 ;;; IplImage manipulation using Racket bytes
-;; convert data to bytestring
-;; TODO: make this conversion to Racket bytes automatically
-;; without the need to require ffi/unsafe library
+;; Get image data:
+;; data is provided in a bytestring (without copying), so that it can be
+;; manipulated in C and in Racket without copying back and forth
 (define data (IplImage-imageData img (* width height channels)))
 
 ;; Invert all pixel values
-;; Slow image manipulation by using bytes
+;; Doing this in Racket is slower than in C by a lot, but the speed is close to
+;; Racket's native vectors
 (let loop ([i (- (* width height channels) 1)])
   (when (>= i 0)
     ;; invert each pixel channel-wise
