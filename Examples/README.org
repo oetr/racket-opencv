@@ -16,4 +16,4 @@ This example shows how to open a camera, to set camera resolution to 640x480 pix
 The program terminates upon a key press.
 
 * VideoSobel.rkt
-This example applies sobel edge detection onto a video stream.
+This example applies sobel edge detection onto camera images.
