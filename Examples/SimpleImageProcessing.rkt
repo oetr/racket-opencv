@@ -13,8 +13,6 @@
 ;; and the book "Learning OpenCV" by Bradski and Kaehler, 2008
 
 ;;; Includes
-
-
 (require "../src/types.rkt"
          "../src/highgui.rkt"
          "../src/core.rkt"
@@ -58,7 +56,8 @@
     (loop (- i 1))))
 
 ;;; Show the image
-(cvNamedWindow "Main Window" CV_WINDOW_AUTOSIZE)
+;; it is not necessary to create a named window before showing the image
+;; (cvNamedWindow "Main Window" CV_WINDOW_AUTOSIZE)
 (cvShowImage "Main Window" img)
 (define x (cvGetWindowHandle "Main Window"))
 (cvMoveWindow "Main Window" 100 100)

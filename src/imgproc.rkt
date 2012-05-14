@@ -93,9 +93,10 @@
   of nearly the same color/brightness using modification of Burt algorithm.
   comp with contain a pointer to sequence (CvSeq)
   of connected components (CvConnectedComp) |#
-  (define-opencv-imgproc cvPyrSegmentation
-    (_fun _pointer _pointer _pointer _pointer _int _double _double
-          -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvPyrSegmentation
+  ;;   (_fun _pointer _pointer _pointer _pointer _int _double _double
+  ;;         -> _void))
   
   #| Filters image using meanshift algorithm |#
   (define-opencv-imgproc cvPyrMeanShiftFiltering
@@ -107,8 +108,9 @@
     (_fun _pointer _pointer -> _void))
 
   #| Inpaints the selected region in the image |#
-  (define-opencv-imgproc cvInpaint
-    (_fun _pointer _pointer _pointer _double _int -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvInpaint
+  ;;   (_fun _pointer _pointer _pointer _double _int -> _void))
 
   #| Calculates an image derivative using generalized Sobel
   (aperture_size = 1,3,5,7) or Scharr (aperture_size = -1) operator.
@@ -302,12 +304,14 @@
   *                              Planar subdivisions        *
   \*********************************************************|#
   #| Initializes Delaunay triangulation |#
-  (define-opencv-imgproc cvInitSubdivDelaunay2D
-    (_fun  _pointer _CvRect -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvInitSubdivDelaunay2D
+  ;;   (_fun  _pointer _CvRect -> _void))
 
   #| Creates new subdivision |#
-  (define-opencv-imgproc cvCreateSubdiv2D
-    (_fun _int  _int _int _int _pointer -> _pointer))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvCreateSubdiv2D
+  ;;   (_fun _int  _int _int _int _pointer -> _pointer))
 
   #|************************ high-level subdivision functions ************|#
 
@@ -326,26 +330,31 @@
 
 
   #| Inserts new point to the Delaunay triangulation |#
-  (define-opencv-imgproc cvSubdivDelaunay2DInsert
-    (_fun _pointer _CvPoint2D32f -> _pointer))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvSubdivDelaunay2DInsert
+  ;;   (_fun _pointer _CvPoint2D32f -> _pointer))
 
   #| Locates a point within the Delaunay triangulation (finds the edge
   the point is left to or belongs to, or the triangulation point the given
   point coinsides with |#
-  (define-opencv-imgproc cvSubdiv2DLocate
-    (_fun _pointer _CvPoint2D32f _pointer _pointer  -> _CvSubdiv2DPointLocation))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvSubdiv2DLocate
+  ;;   (_fun _pointer _CvPoint2D32f _pointer _pointer  -> _CvSubdiv2DPointLocation))
 
   #| Calculates Voronoi tesselation (i.e. coordinates of Voronoi points) |#
-  (define-opencv-imgproc cvCalcSubdivVoronoi2D
-    (_fun _pointer  -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvCalcSubdivVoronoi2D
+  ;;   (_fun _pointer  -> _void))
 
   #| Removes all Voronoi points from the tesselation |#
-  (define-opencv-imgproc cvClearSubdivVoronoi2D
-    (_fun _pointer  -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvClearSubdivVoronoi2D
+  ;;   (_fun _pointer  -> _void))
 
   #| Finds the nearest to the given point vertex in subdivision. |#
-  (define-opencv-imgproc cvFindNearestPoint2D
-    (_fun _pointer _CvPoint2D32f  -> _pointer))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvFindNearestPoint2D
+  ;;   (_fun _pointer _CvPoint2D32f  -> _pointer))
   
   #|*********** Basic quad-edge navigation and operations ***********|#
   ;; TODO: inline following function in Racket
@@ -637,62 +646,74 @@
   (define-opencv-imgproc cvHoughCircles
     (_fun _pointer _pointer _int _double _double _double _double _int _int  -> _void))
 
-  #| Fits a line into set of 2d or 3d points in a robust way (M-estimator technique) |#
+  #| Fits a line into set of 2d or 3d points in a robust way (M-estimator technique)|#
   (define-opencv-imgproc cvFitLine
     (_fun _pointer _int _double _double _double _pointer -> _void))
 
 
   #| Constructs kd-tree from set of feature descriptors |#
-  (define-opencv-imgproc cvCreateKDTree
-    (_fun _pointer -> _pointer))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvCreateKDTree
+  ;;   (_fun _pointer -> _pointer))
 
   #| Constructs spill-tree from set of feature descriptors |#
-  (define-opencv-imgproc cvCreateSpillTree
-    (_fun _pointer _int _double _double -> _pointer))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvCreateSpillTree
+  ;;   (_fun _pointer _int _double _double -> _pointer))
 
   #| Release feature tree |#
-  (define-opencv-imgproc cvReleaseFeatureTree
-    (_fun _pointer -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvReleaseFeatureTree
+  ;;   (_fun _pointer -> _void))
 
   #| Searches feature tree for k nearest neighbors of given reference points,
   searching (in case of kd-tree/bbf) at most emax leaves. |#
-  (define-opencv-imgproc cvFindFeatures
-    (_fun _pointer _pointer _pointer _pointer _int _int -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvFindFeatures
+  ;;   (_fun _pointer _pointer _pointer _pointer _int _int -> _void))
 
   #| Search feature tree for all points that are inlier to given rect region.
   Only implemented for kd trees |#
-  (define-opencv-imgproc cvFindFeaturesBoxed
-    (_fun _pointer _pointer _pointer _pointer -> _int))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvFindFeaturesBoxed
+  ;;   (_fun _pointer _pointer _pointer _pointer -> _int))
 
 
   #| Construct a Locality Sensitive Hash (LSH) table, for indexing d-dimensional vectors of
   given type. Vectors will be hashed L times with k-dimensional p-stable (p=2) functions. |#
-  (define-opencv-imgproc cvCreateLSH
-    (_fun _pointer _int _int _int _int _double _int64  -> _pointer))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvCreateLSH
+  ;;   (_fun _pointer _int _int _int _int _double _int64  -> _pointer))
 
   #| Construct in-memory LSH table, with n bins. |#
-  (define-opencv-imgproc cvCreateMemoryLSH
-    (_fun _int _int _int _int _int _double _int64 -> _pointer))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvCreateMemoryLSH
+  ;;   (_fun _int _int _int _int _int _double _int64 -> _pointer))
 
   #| Free the given LSH structure. |#
-  (define-opencv-imgproc cvReleaseLSH
-    (_fun _pointer -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvReleaseLSH
+  ;;   (_fun _pointer -> _void))
 
   #| Return the number of vectors in the LSH. |#
-  (define-opencv-imgproc LSHSize
-    (_fun _pointer -> _uint))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc LSHSize
+  ;;   (_fun _pointer -> _uint))
 
   #| Add vectors to the LSH structure, optionally returning indices. |#
-  (define-opencv-imgproc cvLSHAdd
-    (_fun _pointer _pointer _pointer -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvLSHAdd
+  ;;   (_fun _pointer _pointer _pointer -> _void))
 
   #| Remove vectors from LSH, as addressed by given indices. |#
-  (define-opencv-imgproc cvLSHRemove
-    (_fun _pointer _pointer -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvLSHRemove
+  ;;   (_fun _pointer _pointer -> _void))
 
   #| Query the LSH n times for at most k nearest points; data is n x d,
   indices and dist are n x k. At most emax stored points will be accessed. |#
-  (define-opencv-imgproc cvLSHQuery
-    (_fun _pointer _pointer _pointer _pointer _int  _int -> _void))
+  ;; Not available in version 2.4.0
+  ;; (define-opencv-imgproc cvLSHQuery
+  ;;   (_fun _pointer _pointer _pointer _pointer _int  _int -> _void))
   
   )
