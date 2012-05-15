@@ -5,10 +5,15 @@
   (provide (all-defined-out))
   ;; Racket Foreign interface
   (require ffi/unsafe
-           ffi/unsafe/define)
+           ffi/unsafe/define
+           "core.rkt")
 
   (define-ffi-definer define-opencv-imgproc
     (ffi-lib "/opt/local/lib/libopencv_imgproc"))
+
+
+  (define-ffi-definer define-opencv-video
+    (ffi-lib "/opt/local/lib/libopencv_video"))  
 
   (require "types.rkt")
 
@@ -68,6 +73,22 @@
   (define-opencv-imgproc cvPyrDown
     (_fun (src : _pointer) (dst : _pointer) (filter : _int)
           -> _void))
+
+  ;; a nicer version of pyrDown taken from the OpenCV book
+  ;; doPyrDown : IplImage x number -> IplImage
+  (define (doPyrDown an-image (a-filter CV_GAUSSIAN_5x5))
+    ;; make sure that the image is divisible by 2
+    (unless (and (zero? (modulo (IplImage-width an-image) 2))
+                 (zero? (modulo (IplImage-height an-image) 2)))
+      (raise-user-error 'doPyrDown
+                        "image dimensions must be divisible by 2, but got width=~a, height=~a~n" (IplImage-width an-image) (IplImage-height an-image)))
+    (define out-image (cvCreateImage (make-CvSize (/ (IplImage-width an-image) 2)
+                                                  (/ (IplImage-height an-image) 2))
+                                     (IplImage-depth an-image)
+                                     (IplImage-nChannels an-image)))
+    (cvPyrDown an-image out-image a-filter)
+    out-image)
+    
 
   ;; Up-samples image and smoothes the result with gaussian kernel.
   ;; dst_width = src_width*2,

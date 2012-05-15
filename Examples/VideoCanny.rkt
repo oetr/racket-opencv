@@ -5,7 +5,9 @@
 ;; Date: 2012
 ;; Description:
 ;; Capture video from a camera
-;; if some key is pressed while the focus is on the video window, the application terminates
+;; apply canny filter
+;; if some key is pressed while the focus is
+;; on the video window, the application terminates
 ;; Tested with iSight camera of my MacBook Pro
 
 ;;; Includes
@@ -15,14 +17,6 @@
          "../src/imgproc.rkt")
 
 (define capture (cvCaptureFromCAM 0))
-
-;; Reduce image resolution to 640x480
-;; for some reason, if the value returned by a C function is not void,
-;; it is implicitly printed out, without being commanded to!
-;; to prevent a print out by default, we bind returned value to a symbol
- (define param-set #f)
- (set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0))
- (set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0))
 
 ;; Capture an image to get parameters
 (define captured-image (cvQueryFrame capture))
@@ -39,8 +33,13 @@
 (define frame (cvCreateImage size IPL_DEPTH_8U 1))
 
 (let loop ()
-  (set! captured-image (cvQueryFrame capture))  
-  (cvShowImage "Video Capture" captured-image)
+  (set! captured-image (cvQueryFrame capture))
+  (cvConvertImage captured-image frame IPL_DEPTH_8U)
+  (cvSmooth frame frame CV_GAUSSIAN 11 11 0.0 0.0)
+  (define out (doPyrDown (doPyrDown frame)))
+  (cvCanny out out 50.0 100.0 3)
+  
+  (cvShowImage "Video Capture" out)
   (unless (>= (cvWaitKey 1) 0)
     (loop)))
 

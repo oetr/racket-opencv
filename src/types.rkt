@@ -2,10 +2,7 @@
   (provide (all-defined-out))
 
   (require ffi/unsafe
-           ffi/unsafe/define)
-  
-  (define-ffi-definer define-opencv-highgui
-    (ffi-lib "/opt/local/lib/libopencv_highgui"))
+           ffi/unsafe/define)  
 
   #| CvArr* is used to pass arbitrary
   * array-like data structures
@@ -192,10 +189,156 @@
   floating point data in IplImage's |#
   (define IPL_DEPTH_64F  64)
 
+  #|********************** CvSlice **********************|#
+  (define-cstruct _CvSlice
+    ([start_index _int]
+     [end_index _int]))
+
+  (define (cvSlice start end)
+    (make-CvSlice start end))
+
+  (define CV_WHOLE_SEQ_END_INDEX #x3fffffff)
+  (define CV_WHOLE_SEQ  (make-CvSlice 0 CV_WHOLE_SEQ_END_INDEX))
+
   #|****************************************************************
   *                       Matrix type (CvMat)                      *
   \*****************************************************************|#
   ;; TODO : port CvMat later
+  (define CV_CN_MAX     512)
+  (define CV_CN_SHIFT   3)
+  (define CV_DEPTH_MAX  (arithmetic-shift 1 CV_CN_SHIFT))
+
+  (define CV_8U   0)
+  (define CV_8S   1)
+  (define CV_16U  2)
+  (define CV_16S  3)
+  (define CV_32S  4)
+  (define CV_32F  5)
+  (define CV_64F  6)
+  (define CV_USRTYPE1 7)
+
+  (define CV_MAT_DEPTH_MASK       (- CV_DEPTH_MAX 1))
+  (define (CV_MAT_DEPTH flags) (bitwise-and flags CV_MAT_DEPTH_MASK))
+
+  (define (CV_MAKETYPE depth cn)
+    (+ (CV_MAT_DEPTH depth)
+       (arithmetic-shift (- cn 1) CV_CN_SHIFT)))
+  
+  (define CV_MAKE_TYPE CV_MAKETYPE)
+
+  (define CV_8UC1 (CV_MAKETYPE CV_8U 1))
+  (define CV_8UC2 (CV_MAKETYPE CV_8U 2))
+  (define CV_8UC3 (CV_MAKETYPE CV_8U 3))
+  (define CV_8UC4 (CV_MAKETYPE CV_8U 4))
+  (define (CV_8UC n) CV_MAKETYPE(CV_8U n))
+
+  (define CV_8SC1 (CV_MAKETYPE CV_8S 1))
+  (define CV_8SC2 (CV_MAKETYPE CV_8S 2))
+  (define CV_8SC3 (CV_MAKETYPE CV_8S 3))
+  (define CV_8SC4 (CV_MAKETYPE CV_8S 4))
+  (define (CV_8SC n) CV_MAKETYPE(CV_8S n))
+
+  (define CV_16UC1 (CV_MAKETYPE CV_16U 1))
+  (define CV_16UC2 (CV_MAKETYPE CV_16U 2))
+  (define CV_16UC3 (CV_MAKETYPE CV_16U 3))
+  (define CV_16UC4 (CV_MAKETYPE CV_16U 4))
+  (define (CV_16UC n) CV_MAKETYPE(CV_16U n))
+
+  (define CV_16SC1 (CV_MAKETYPE CV_16S 1))
+  (define CV_16SC2 (CV_MAKETYPE CV_16S 2))
+  (define CV_16SC3 (CV_MAKETYPE CV_16S 3))
+  (define CV_16SC4 (CV_MAKETYPE CV_16S 4))
+  (define (CV_16SC n) CV_MAKETYPE(CV_16S n))
+
+  (define CV_32SC1 (CV_MAKETYPE CV_32S 1))
+  (define CV_32SC2 (CV_MAKETYPE CV_32S 2))
+  (define CV_32SC3 (CV_MAKETYPE CV_32S 3))
+  (define CV_32SC4 (CV_MAKETYPE CV_32S 4))
+  (define (CV_32SC n) CV_MAKETYPE(CV_32S n))
+
+  (define CV_32FC1 (CV_MAKETYPE CV_32F 1))
+  (define CV_32FC2 (CV_MAKETYPE CV_32F 2))
+  (define CV_32FC3 (CV_MAKETYPE CV_32F 3))
+  (define CV_32FC4 (CV_MAKETYPE CV_32F 4))
+  (define (CV_32FC n) (CV_MAKETYPE CV_32F n))
+
+  (define CV_64FC1 (CV_MAKETYPE CV_64F 1))
+  (define CV_64FC2 (CV_MAKETYPE CV_64F 2))
+  (define CV_64FC3 (CV_MAKETYPE CV_64F 3))
+  (define CV_64FC4 (CV_MAKETYPE CV_64F 4))
+  (define (CV_64FC n) (CV_MAKETYPE CV_64F n))
+
+  (define CV_AUTO_STEP  #x7fffffff)
+  (define CV_WHOLE_ARR  (cvSlice 0 #x3fffffff))
+
+  (define CV_MAT_CN_MASK          (arithmetic-shift (- CV_CN_MAX 1) CV_CN_SHIFT))
+  (define (CV_MAT_CN flags)
+    (arithmetic-shift
+     (add1 (bitwise-and flags CV_MAT_CN_MASK) (- CV_CN_SHIFT))))
+  
+  (define CV_MAT_TYPE_MASK        (sub1 (* CV_DEPTH_MAX CV_CN_MAX)))
+  (define (CV_MAT_TYPE flags)      (bitwise-and flags CV_MAT_TYPE_MASK))
+  (define CV_MAT_CONT_FLAG_SHIFT  14)
+  (define CV_MAT_CONT_FLAG        (expt 2 CV_MAT_CONT_FLAG_SHIFT))
+  (define (CV_IS_MAT_CONT flags)
+    (bitwise-and flags CV_MAT_CONT_FLAG))
+  (define CV_IS_CONT_MAT          CV_IS_MAT_CONT)
+  (define CV_SUBMAT_FLAG_SHIFT    15)
+  (define CV_SUBMAT_FLAG          (expt 2 CV_SUBMAT_FLAG_SHIFT))
+
+  (define CV_MAGIC_MASK       #xFFFF0000)
+  (define CV_MAT_MAGIC_VAL    #x42420000)
+  (define CV_TYPE_NAME_MAT    "opencv-matrix")
+
+  #| 0x3a50 = 11 10 10 01 01 00 00 ~ array of log2(sizeof(arr_type_elem)) |#
+  (define (CV_ELEM_SIZE type)
+    (arithmetic-shift
+     (CV_MAT_CN type)
+     (bitwise-and (arithmetic-shift (* (+ (/ (ctype-sizeof size_t) 4) 1)
+                                       (bitwise-ior 16384 #x3a50))
+                                    (- (* (CV_MAT_DEPTH type) 2)))
+                  -3)))               
+
+
+
+  (define CvMatUnion-data
+    (_union (_cpointer _ubyte)    ;; ptr
+            (_cpointer _sbyte)    ;; s
+            (_cpointer _int)      ;; i
+            (_cpointer _float)    ;; fl 
+            (_cpointer _double))) ;; db
+
+  (define (cvMatData-ptr a-Mat)
+    (make-sized-byte-string (union-ref (CvMat-data a-Mat) 0)
+                            (* (CvMat-rows a-Mat)
+                               (CvMat-cols a-Mat))))
+  (define-cstruct _CvMat
+    ([type _int]
+     [step _int]
+     ;; for internal use only
+     [refcount _pointer]
+     [hdr_refcount _int]
+     ;; data and dimensions
+     [data CvMatUnion-data]
+     [rows _int]
+     [cols _int]))
+
+  #| Inline constructor. No data is allocated internally!!!
+  * (Use together with cvCreateData, or use cvCreateMat instead to
+  * get a matrix with allocated data):
+  |#
+  (define (cvMat rows cols type (data-ptr #f))
+    (unless (<= (CV_MAT_DEPTH type) CV_64F)
+      (raise-type-error cvMat "<= CV_64F" type))
+    (define type (CV_MAT_TYPE type))
+    (make-CvMat
+     (bitwise-ior CV_MAT_MAGIC_VAL CV_MAT_CONT_FLAG type) ;; type
+     (* cols (CV_ELEM_SIZE type)) ;; step
+     #f ;; refcount
+     0 ;; hdr_refcount
+     data-ptr
+     rows
+     cols))
 
 
   #|/**********************************************************************
@@ -300,14 +443,6 @@
      [minus_delta _int]
      [plus_step _int]
      [minus_step _int]))
-
-  #|********************** CvSlice **********************|#
-  (define-cstruct _CvSlice
-    ([start_index _int]
-     [end_index _int]))
-
-  (define CV_WHOLE_SEQ_END_INDEX #x3fffffff)
-  (define CV_WHOLE_SEQ  (make-CvSlice 0 CV_WHOLE_SEQ_END_INDEX))
 
   #|******************** CvScalar **********************|#
   ;; TODO : make the function easier, to one that accepts 4 arguments 
@@ -483,17 +618,6 @@
 
 (define CV_TYPE_NAME_GRAPH "opencv-graph")
 
-
-
-  
-  
-
-  ;; (define-cstruct _CvMat
-  ;;   ([type  _int]
-  ;;    [step  _int]
-  ;;    [refcount  (_cpointer _int)]
-  ;;    [hdr_refcount  _int]
-  ;;    [values _pointer]))
 
 
   ;;; *********************************************************

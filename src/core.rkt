@@ -13,7 +13,85 @@
   (require "types.rkt")
 
 ;;; FFI Definers
-  (define-opencv-core cvSetImageROI (_fun _pointer _CvRect -> _void))
+  #|***************************************************************************************\
+*          Array allocation, deallocation, initialization and access to elements         *
+  \***************************************************************************************|#
+
+  #| Allocates and initializes IplImage header |#
+  (define-opencv-core cvCreateImageHeader (_fun _CvSize _int _int
+                                          -> (ipl-image : (_ptr io _IplImage))
+                                          -> (ptr-ref ipl-image _IplImage)))
+
+  #| Inializes IplImage header |#
+  (define-opencv-core cvInitImageHeader (_fun _pointer _CvSize _int _int _int _int
+                                          -> (ipl-image : (_ptr io _IplImage))
+                                          -> (ptr-ref ipl-image _IplImage)))
+
+  #| Creates IPL image (header and data) |#
+  (define-opencv-core cvCreateImage (_fun _CvSize _int _int
+                                          -> (ipl-image : (_ptr io _IplImage))
+                                          -> (ptr-ref ipl-image _IplImage)))
+
+  #| Releases (i.e. deallocates) IPL image header |#
+  (define-opencv-core cvReleaseImageHeader
+    (_fun (_ptr i _pointer) -> _void))
+
+  #| Releases IPL image header and data |#
+  (define-opencv-core cvReleaseImage
+    (_fun (_ptr i _pointer) -> _void)) 
+
+  #| Creates a copy of IPL image (widthStep may differ) |#
+  (define-opencv-core cvCloneImage
+    (_fun _pointer
+          -> (ipl-image : (_ptr io _IplImage))
+          -> (ptr-ref ipl-image _IplImage))) 
+
+  #| Sets a Channel Of Interest (only a few functions support COI) -
+  use cvCopy to extract the selected channel and/or put it back |#
+  (define-opencv-core cvSetImageCOI
+    (_fun _pointer _int -> _void))
+
+  #| Retrieves image Channel Of Interest |#
+  (define-opencv-core cvGetImageCOI
+    (_fun _pointer -> _int))
+
+  #| Sets image ROI (region of interest) (COI is not changed) |#
+  (define-opencv-core cvSetImageROI
+    (_fun _pointer _CvRect -> _void))
+
+  #| Resets image ROI and COI |#
+  (define-opencv-core cvResetImageROI
+    (_fun _IplImage -> _void))
+
+  #| Retrieves image ROI |#
+  (define-opencv-core cvGetImageROI
+    (_fun _pointer -> _CvRect))
+
+  #| Allocates and initalizes CvMat header |#
+  (define-opencv-core cvCreateMatHeader
+    (_fun _int _int _int
+          -> (mat : (_ptr io _CvMat))
+          -> (ptr-ref mat _CvMat)))
+  
+  (define CV_AUTOSTEP  #x7fffffff)
+
+
+  #| Initializes CvMat header |#
+  (define-opencv-core cvInitMatHeader
+    (_fun _pointer _int _int _int _pointer _int
+          -> (mat : (_ptr io _CvMat))
+          -> (ptr-ref mat _CvMat)))
+
+  #| Allocates and initializes CvMat header and allocates data |#
+  (define-opencv-core cvCreateMat
+    (_fun _int _int _int
+          -> (mat : (_ptr io _CvMat))
+          -> (ptr-ref mat _CvMat)))
+
+  #| Releases CvMat header and deallocates matrix data
+  (reference counting is used for data) |#
+  (define-opencv-core cvReleaseMat
+    (_fun (_ptr i _pointer) -> _void))
 
   (define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
@@ -21,10 +99,6 @@
                                    (dst : (_ptr i _IplImage))
                                    _pointer
                                    -> _void))
-
-  (define-opencv-core cvCreateImage (_fun _CvSize _int _int
-                                          -> (ipl-image : (_ptr io _IplImage))
-                                          -> (ptr-ref ipl-image _IplImage)))
 
 
   (define (make-c-array size type)
@@ -58,18 +132,6 @@
   ;;             (array-filter fn array (+ min 1) max)))))
 
   ;; (define a (make-c-array 20 _int))
-  ;; (array-filter (lambda (x) (< x 10)) a 20)
-
-;;; Structs
-  ;; (define data (_union (_cpointer _ubyte)))
-  ;; (define-cstruct _CvMat
-  ;;   ([type _int]
-  ;;    [step _int]
-  ;;    ;; for internal use only
-  ;;    [refcount _gcpointer]
-  ;;    [hdr_refcount _int]
-  ;;    ))
-;;; Procedures
-  ;;(define-opencv-highgui cvCreateMat (_fun _int _int _int -> _pointer))
+  ;; (array-filter (lambda (x) (< x 10)) a 20)  
 
 )

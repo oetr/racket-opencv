@@ -7,6 +7,10 @@
   ;; Racket Foreign interface
   (require ffi/unsafe
            ffi/unsafe/define)
+
+  (define-ffi-definer define-opencv-highgui
+    (ffi-lib "/opt/local/lib/libopencv_highgui"))
+  
   ;; Ported OpenCV requirements
   (require "types.rkt")
   (require "core.rkt")
