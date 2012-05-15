@@ -31,15 +31,16 @@
 
 ;; Init an IplImage to where captured images will be copied
 (define frame (cvCreateImage size IPL_DEPTH_8U 1))
+(define out #f)
 
 (let loop ()
   (set! captured-image (cvQueryFrame capture))
   (cvConvertImage captured-image frame IPL_DEPTH_8U)
   (cvSmooth frame frame CV_GAUSSIAN 11 11 0.0 0.0)
-  (define out (doPyrDown (doPyrDown frame)))
-  (cvCanny out out 50.0 100.0 3)
-  
+  (set! out (doPyrDown frame))
+  (cvCanny out out 50.0 100.0 3)  
   (cvShowImage "Video Capture" out)
+  (cvReleaseImage out)  
   (unless (>= (cvWaitKey 1) 0)
     (loop)))
 
