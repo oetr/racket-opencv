@@ -44,7 +44,7 @@
 ;; Get image data:
 ;; data is provided in a bytestring (without copying), so that it can be
 ;; manipulated in C and in Racket without copying back and forth
-(define data (IplImage-imageData img (* width height channels)))
+(define data (IplImage-data img))
 
 ;; Invert all pixel values
 ;; Doing this in Racket is slower than in C by a lot, but the speed is close to

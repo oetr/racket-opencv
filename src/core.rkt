@@ -5,7 +5,8 @@
   (provide (all-defined-out))
   ;; Racket Foreign interface
   (require ffi/unsafe
-           ffi/unsafe/define)
+           ffi/unsafe/define
+           ffi/vector)
 
   (define-ffi-definer define-opencv-core
     (ffi-lib "/opt/local/lib/libopencv_core"))
@@ -28,9 +29,37 @@
                                           -> (ptr-ref ipl-image _IplImage)))
 
   #| Creates IPL image (header and data) |#
-  (define-opencv-core cvCreateImage (_fun _CvSize _int _int
-                                          -> (ipl-image : (_ptr io _IplImage))
-                                          -> (ptr-ref ipl-image _IplImage)))
+  ;; (define-opencv-core cvCreateImage (_fun _CvSize _int _int
+  ;;                                         -> (ipl-image : (_ptr i _IplImage))
+  ;;                                         -> (ptr-ref ipl-image _IplImage)))
+  
+   ;; (define-opencv-core cvCreateImage
+   ;;   (_fun _CvSize _int _int ->
+   ;;         -> (img : _pointer)
+   ;;         -> (ptr-ref img _IplImage)))
+
+  ;; (define-opencv-core cvCreateImage
+  ;;   (_cprocedure (list _CvSize _int _int) _IplImage
+  ;;                (lambda ()
+   (define-opencv-core cvCreateImage
+     (_cprocedure (list _CvSize _int _int) _pointer
+                  #:atomic? #t
+                  #:wrapper
+                  (lambda (ffi-obj)
+                    (lambda (size depth channels)
+                      (ptr-ref (ffi-obj size depth channels) _IplImage)))))
+
+           ;; -> (img : _pointer = (malloc 'atomic _IplImage))
+           ;; -> (ptr-ref img _IplImage)))
+   
+  ;; (define (create-image size depth channels)
+  ;;   (define img (malloc 'atomic _IplImage))
+  ;;   (ptr-ref(cvCreateImage size depth channels)
+    
+    
+  ;;   ()
+  ;;                                         -> (ipl-image : (_ptr i _IplImage))
+  ;;                                         -> (ptr-ref ipl-image _IplImage)))
 
   #| Releases (i.e. deallocates) IPL image header |#
   (define-opencv-core cvReleaseImageHeader
@@ -38,8 +67,11 @@
 
   #| Releases IPL image header and data |#
   (define-opencv-core cvReleaseImage
-    (_fun (_ptr i _pointer) -> _void)) 
+    (_fun (_ptr i _pointer) -> _void))
 
+  (define (cvReleaseImages . images)
+    (andmap cvReleaseImage images))
+  
   #| Creates a copy of IPL image (widthStep may differ) |#
   (define-opencv-core cvCloneImage
     (_fun _pointer
@@ -112,7 +144,7 @@
     ([nameFont _string]     ;; Qt:nameFont
      ;; Qt:ColorFont -> cvScalar(blue_component, green_component,
      ;; red\_component[, alpha_component])
-     [color _CvScalar] 
+     [color _CvScalar]
      [font_face _int]       ;; Qt: bool italic         =CV_FONT_
      [ascii (_ptr i _int)]  ;; font data and metrics
      [greek _string]
@@ -132,6 +164,17 @@
   ;;             (array-filter fn array (+ min 1) max)))))
 
   ;; (define a (make-c-array 20 _int))
-  ;; (array-filter (lambda (x) (< x 10)) a 20)  
+  ;; (array-filter (lambda (x) (< x 10)) a 20)
+
+
+  ;; Drawing
+  (define CV_FILLED -1)
+  #| Draws a rectangle given two opposite corners of the rectangle (pt1 & pt2),
+  if thickness<0 (e.g. thickness == CV_FILLED), the filled box is drawn |#
+  (define (cvRectangle img pt1 pt2 color (thickness 1) (line_type 8) (shift 0))
+    (define-opencv-core cvRectangle
+      (_fun _pointer _CvPoint _CvPoint _CvScalar _int
+            _int _int -> _void))
+     (cvRectangle img pt1 pt2 color thickness line_type shift))
 
 )

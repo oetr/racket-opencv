@@ -71,7 +71,10 @@
   ;; dst_width = floor(src_width/2)[+1],
   ;; dst_height = floor(src_height/2)[+1]
   (define-opencv-imgproc cvPyrDown
-    (_fun (src : _pointer) (dst : _pointer) (filter : _int)
+    (_fun (src dst (filter CV_GAUSSIAN_5x5)) ::
+          (src : _pointer)
+          (dst : _pointer)
+          (filter : _int)
           -> _void))
 
   ;; a nicer version of pyrDown taken from the OpenCV book
@@ -146,6 +149,15 @@
   #| Converts input array pixels from one color space to another |#
   (define-opencv-imgproc cvCvtColor
     (_fun _pointer _pointer _int -> _void))
+
+  (define (convert-color an-image new-depth new-channels conversion-flag)
+    (define out-image (cvCreateImage
+                       (make-CvSize (IplImage-width an-image)
+                                    (IplImage-height an-image))
+                       new-depth
+                       new-channels))
+    (cvCvtColor an-image out-image conversion-flag)
+    out-image)
 
   #| Resizes image (input array is resized to fit the destination array) |#
   (define-opencv-imgproc cvResize

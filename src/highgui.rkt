@@ -173,6 +173,15 @@
   (define-opencv-highgui cvConvertImage
     (_fun _pointer _pointer _int -> _void))
 
+  ;; (define (convertImage an-image ()
+  ;;   (define out-image (cvCreateImage
+  ;;                      (make-CvSize (IplImage-width an-image)
+  ;;                                   (IplImage-height an-image))
+  ;;                      depth
+  ;;                      (IplImage-nChannels an-image)))
+  ;;   (cvConvertImage an-image out-image depth)
+  ;;   out-image)
+
   ;; wait for key event infinitely (delay<=0) or for "delay" milliseconds
   (define-opencv-highgui cvWaitKey
     (_fun _int -> _int))

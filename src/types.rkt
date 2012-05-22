@@ -151,15 +151,17 @@
      [imageId _pointer]
      [IplTileInfo _pointer]
      [imageSize _int]
-     [imageDataInternal (_cpointer _ubyte)]
+     [imageData (_cpointer _ubyte)]
      [widthStep _int]
      [BorderMode (_array _int 4)]
      [BorderConst (_array _int 4)]
      [imageDataOrigin (_cpointer _ubyte)]))
 
-  (define (IplImage-imageData img size)
-    (make-sized-byte-string (IplImage-imageDataInternal img)
-                            size))
+  (define (IplImage-data img)
+    (make-sized-byte-string (IplImage-imageData img)
+                            (* (IplImage-width img)
+                               (IplImage-nChannels img)
+                               (IplImage-height img))))
 
   (define-cstruct _IplConvKernel
     ([nCols  _int]
@@ -448,6 +450,39 @@
   ;; TODO : make the function easier, to one that accepts 4 arguments 
   (define-cstruct _CvScalar
     ([val (_array _double 4)]))
+
+  (define (cvScalar val0 (val1 0) (val2 0) (val3 0))
+    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
+    (array-set! an-array 0 (exact->inexact val0))
+    (array-set! an-array 1 (exact->inexact val1))
+    (array-set! an-array 2 (exact->inexact val2))
+    (array-set! an-array 3 (exact->inexact val3))
+    (make-CvScalar an-array))
+
+  (define (cvRGB r g b)
+    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
+    (array-set! an-array 0 (exact->inexact b))
+    (array-set! an-array 1 (exact->inexact g))
+    (array-set! an-array 2 (exact->inexact r))
+    (array-set! an-array 3 0.0)
+    (make-CvScalar an-array))
+  
+  (define (cvRealScalar a-number)
+    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
+    (array-set! an-array 0 (exact->inexact a-number))
+    (array-set! an-array 1 0.0)
+    (array-set! an-array 2 0.0)
+    (array-set! an-array 3 0.0)
+    (make-CvScalar an-array))
+
+  (define (cvScalarAll a-number)
+    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
+    (define inexact-number (exact->inexact a-number))
+    (array-set! an-array 0 inexact-number)
+    (array-set! an-array 1 inexact-number)
+    (array-set! an-array 2 inexact-number)
+    (array-set! an-array 3 inexact-number)
+    (make-CvScalar an-array))
 
   #|***************************************************
   *              Dynamic Data structures              *
