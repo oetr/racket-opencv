@@ -59,7 +59,9 @@
   
   ;; display image within window (highgui windows remember their content)
   (define-opencv-highgui cvShowImage
-    (_fun _string (_ptr i _IplImage) -> _void))
+    (_fun _string _pointer -> _void))
+
+  (define imshow cvShowImage)
 
   ;; resize/move window
   (define-opencv-highgui cvResizeWindow

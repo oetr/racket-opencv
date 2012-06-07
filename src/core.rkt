@@ -125,6 +125,12 @@
   (define-opencv-core cvReleaseMat
     (_fun (_ptr i _pointer) -> _void))
 
+  ;; Creates an exact copy of the input matrix (except, may be, step value)
+  (define-opencv-core cvCloneMat
+    (_fun _pointer
+          -> (mat : _pointer)
+          -> (ptr-ref mat _CvMat)))
+
   ;; Allocates array data
   (define-opencv-core cvCreateData
     (_fun _pointer -> _void))
@@ -136,7 +142,13 @@
   (define (cvMat rows cols type (data-ptr #f))
     (unless (<= (CV_MAT_DEPTH type) CV_64F)
       (raise-type-error cvMat "<= CV_64F" type))
-    (cvCreateData (cvCreateMatHeader rows cols type)))
+    (define arr (cvCreateMatHeader rows cols type))
+    (cvCreateData arr)
+    (when data-ptr
+      (ptr-set! (union-ref (CvMat-data arr) 0)
+                _pointer data-ptr))
+    ;;    (union-set! (CvMat-data arr) 0 (ptr-ref data-ptr _ubyte))
+    arr)
   
 
   ;; Releases array data
@@ -153,7 +165,12 @@
   In the latter case the function raises an error if
   the array can not be represented as a matrix |#
   (define-opencv-core cvGetRawData
-    (_fun _pointer _pointer _pointer _pointer -> _void))
+    (_fun (arr data (step #f) (roi-size #f)) ::
+          (arr : _pointer)
+          (data : (_ptr io (_ptr io _ubyte)))
+          (step : _pointer)
+          (roi-size : _pointer)
+          -> _void))
 
   ;; Returns width and height of array in elements
   (define-opencv-core cvGetSize
@@ -169,13 +186,13 @@
                                    _pointer
                                    -> _void))
   
-(define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
+  (define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
   (define (make-c-array size type)
     (ptr-ref (malloc type 'atomic)
              (_array type size)))
 
-  (define (c-array (type _int) . vals)
+  (define (c-array type . vals)
     (define an-array (make-c-array (length vals) type))
     (for ([val (in-list vals)]
           [i (in-range 0 (length vals))])
@@ -223,14 +240,15 @@
   ;; Initializes font structure used further in cvPutText
   (define-opencv-core cvInitFont
     (_fun (font-face hscale vscale (shear 0.0) (thickness 1) (line-type 8)) ::
-          (font : _pointer = (malloc _CvFont))
+          (font : _pointer = (malloc _CvFont 'atomic))
           (font-face : _int)
           (hscale : _double)
           (vscale : _double)
           (shear : _double)
           (thickness : _int)
           (line-type : _int)
-          -> (font : _CvFont)))
+          -> (font : _pointer)
+          -> (ptr-ref font _CvFont)))
 
   
   (define (cvFont scale (thickness 1))

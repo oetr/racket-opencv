@@ -305,11 +305,11 @@
 
 
   (define CvMatUnion-data
-    (_union (_cpointer _ubyte)    ;; byte
-            (_cpointer _sbyte)    ;; s
-            (_cpointer _int)      ;; i
-            (_cpointer _float)    ;; fl 
-            (_cpointer _double))) ;; db
+    (_union _pointer    ;; byte
+            _pointer    ;; s
+            _pointer      ;; i
+            _pointer    ;; fl 
+            _pointer)) ;; db
 
   (define (cvMatData-ptr a-Mat (ptr 0))
     (make-sized-byte-string (union-ref (CvMat-data a-Mat) ptr)
