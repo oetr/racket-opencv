@@ -125,20 +125,83 @@
   (define-opencv-core cvReleaseMat
     (_fun (_ptr i _pointer) -> _void))
 
-  (define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
+  ;; Allocates array data
+  (define-opencv-core cvCreateData
+    (_fun _pointer -> _void))
 
+  #| Inline constructor. No data is allocated internally!!!
+  * (Use together with cvCreateData, or use cvCreateMat instead to
+  * get a matrix with allocated data):
+  |#
+  (define (cvMat rows cols type (data-ptr #f))
+    (unless (<= (CV_MAT_DEPTH type) CV_64F)
+      (raise-type-error cvMat "<= CV_64F" type))
+    (cvCreateData (cvCreateMatHeader rows cols type)))
+  
+
+  ;; Releases array data
+  (define-opencv-core cvReleaseData
+    (_fun _pointer -> _void))
+
+  #| Attaches user data to the array header. The step is reffered to
+  the pre-last dimension. That is, all the planes of the array
+  must be joint (w/o gaps) |#
+  (define-opencv-core cvSetData
+    (_fun _pointer _pointer _int -> _void))
+
+  #| Retrieves raw data of CvMat, IplImage or CvMatND.
+  In the latter case the function raises an error if
+  the array can not be represented as a matrix |#
+  (define-opencv-core cvGetRawData
+    (_fun _pointer _pointer _pointer _pointer -> _void))
+
+  ;; Returns width and height of array in elements
+  (define-opencv-core cvGetSize
+    (_fun _pointer -> _void))
+
+  ;; Clears all the array elements (sets them to 0)
+  (define-opencv-core cvSetZero
+    (_fun _pointer -> _void))
+
+  ;; Copies source array to destination array
   (define-opencv-core cvCopy (_fun (src : _pointer)
                                    (dst : (_ptr i _IplImage))
                                    _pointer
                                    -> _void))
-
+  
+(define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
   (define (make-c-array size type)
-    (define a (_array type size))
-    (define ptr (malloc type 'atomic))
-    (ptr-ref ptr a))
+    (ptr-ref (malloc type 'atomic)
+             (_array type size)))
 
+  (define (c-array (type _int) . vals)
+    (define an-array (make-c-array (length vals) type))
+    (for ([val (in-list vals)]
+          [i (in-range 0 (length vals))])
+         (array-set! an-array i val))
+    an-array)
 
+  ;; Drawing
+  (define (CV_RGB r g b)
+    (cvScalar b g r 0))
+  (define CV_FILLED -1)
+  (define CV_AA 16)
+
+  #| basic font types |#
+  (define CV_FONT_HERSHEY_SIMPLEX         0)
+  (define CV_FONT_HERSHEY_PLAIN           1)
+  (define CV_FONT_HERSHEY_DUPLEX          2)
+  (define CV_FONT_HERSHEY_COMPLEX         3)
+  (define CV_FONT_HERSHEY_TRIPLEX         4)
+  (define CV_FONT_HERSHEY_COMPLEX_SMALL   5)
+  (define CV_FONT_HERSHEY_SCRIPT_SIMPLEX  6)
+  (define CV_FONT_HERSHEY_SCRIPT_COMPLEX  7)
+
+  ;; font flags
+  (define CV_FONT_ITALIC                 16)
+
+  (define CV_FONT_VECTOR0    CV_FONT_HERSHEY_SIMPLEX)
   ;; Font structure
   (define-cstruct _CvFont
     ([nameFont _string]     ;; Qt:nameFont
@@ -156,25 +219,35 @@
      [dx     _float]        ;; horizontal interval between letters
      [line_type _int]))	    ;; Qt: PointSize
 
-  ;; (define (array-filter fn array min max)
-  ;;   (if (= min max) empty
-  ;;       (let ([value (array-ref array min)])        
-  ;;         (if (fn value)
-  ;;             (cons value (array-filter fn array (+ min 1) max))
-  ;;             (array-filter fn array (+ min 1) max)))))
 
-  ;; (define a (make-c-array 20 _int))
-  ;; (array-filter (lambda (x) (< x 10)) a 20)
+  ;; Initializes font structure used further in cvPutText
+  (define-opencv-core cvInitFont
+    (_fun (font-face hscale vscale (shear 0.0) (thickness 1) (line-type 8)) ::
+          (font : _pointer = (malloc _CvFont))
+          (font-face : _int)
+          (hscale : _double)
+          (vscale : _double)
+          (shear : _double)
+          (thickness : _int)
+          (line-type : _int)
+          -> (font : _CvFont)))
 
+  
+  (define (cvFont scale (thickness 1))
+    (cvInitFont CV_FONT_HERSHEY_PLAIN scale scale 0.0 thickness CV_AA))
 
-  ;; Drawing
-  (define CV_FILLED -1)
   #| Draws a rectangle given two opposite corners of the rectangle (pt1 & pt2),
   if thickness<0 (e.g. thickness == CV_FILLED), the filled box is drawn |#
   (define (cvRectangle img pt1 pt2 color (thickness 1) (line_type 8) (shift 0))
     (define-opencv-core cvRectangle
       (_fun _pointer _CvPoint _CvPoint _CvScalar _int
             _int _int -> _void))
-     (cvRectangle img pt1 pt2 color thickness line_type shift))
+    (cvRectangle img pt1 pt2 color thickness line_type shift))
 
+
+  #| Renders text stroke with specified font and color at specified location.
+  CvFont should be initialized with cvInitFont |#
+  (define-opencv-core cvPutText
+    (_fun _pointer _string _CvPoint _pointer _CvScalar
+          -> _void))
 )

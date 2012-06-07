@@ -275,8 +275,9 @@
 
   (define CV_MAT_CN_MASK          (arithmetic-shift (- CV_CN_MAX 1) CV_CN_SHIFT))
   (define (CV_MAT_CN flags)
-    (arithmetic-shift
-     (add1 (bitwise-and flags CV_MAT_CN_MASK) (- CV_CN_SHIFT))))
+    (add1 (arithmetic-shift
+           (bitwise-and flags CV_MAT_CN_MASK)
+           (- CV_CN_SHIFT))))
   
   (define CV_MAT_TYPE_MASK        (sub1 (* CV_DEPTH_MAX CV_CN_MAX)))
   (define (CV_MAT_TYPE flags)      (bitwise-and flags CV_MAT_TYPE_MASK))
@@ -304,16 +305,17 @@
 
 
   (define CvMatUnion-data
-    (_union (_cpointer _ubyte)    ;; ptr
+    (_union (_cpointer _ubyte)    ;; byte
             (_cpointer _sbyte)    ;; s
             (_cpointer _int)      ;; i
             (_cpointer _float)    ;; fl 
             (_cpointer _double))) ;; db
 
-  (define (cvMatData-ptr a-Mat)
-    (make-sized-byte-string (union-ref (CvMat-data a-Mat) 0)
+  (define (cvMatData-ptr a-Mat (ptr 0))
+    (make-sized-byte-string (union-ref (CvMat-data a-Mat) ptr)
                             (* (CvMat-rows a-Mat)
                                (CvMat-cols a-Mat))))
+
   (define-cstruct _CvMat
     ([type _int]
      [step _int]
@@ -324,24 +326,6 @@
      [data CvMatUnion-data]
      [rows _int]
      [cols _int]))
-
-  #| Inline constructor. No data is allocated internally!!!
-  * (Use together with cvCreateData, or use cvCreateMat instead to
-  * get a matrix with allocated data):
-  |#
-  (define (cvMat rows cols type (data-ptr #f))
-    (unless (<= (CV_MAT_DEPTH type) CV_64F)
-      (raise-type-error cvMat "<= CV_64F" type))
-    (define type (CV_MAT_TYPE type))
-    (make-CvMat
-     (bitwise-ior CV_MAT_MAGIC_VAL CV_MAT_CONT_FLAG type) ;; type
-     (* cols (CV_ELEM_SIZE type)) ;; step
-     #f ;; refcount
-     0 ;; hdr_refcount
-     data-ptr
-     rows
-     cols))
-
 
   #|/**********************************************************************
   *                       Multi-dimensional dense array (CvMatND)         *

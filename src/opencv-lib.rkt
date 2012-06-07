@@ -5,7 +5,7 @@ Copyright (C) Peter Samarin
 
 (module opencv-lib racket
   ;; eval the require in order to provide a
-  ;; "define-ffi-definer" and "ffi-lib"
+  ;; "define-ffi-definer" and "ffi-lib"  
   (eval
    '(require ffi/unsafe
              ffi/unsafe/define))
@@ -62,6 +62,22 @@ Copyright (C) Peter Samarin
                   lib-files)
              (map path->string lib-paths)))
       #f))
+
+  (define-syntax (defchipmunk stx)
+    (syntax-case stx ()
+      [(defchipmunk name #:ptr type)
+       #`(begin (provide name)
+                (define name
+                  (let ()
+                    (define-chipmunk ptr _pointer
+                      #:c-id #,(datum->syntax
+                                #'name
+                                (string->symbol
+                                 (format "_~a" (syntax->datum #'name)))))
+                    (function-ptr ptr type))))]
+      [(defchipmunk name type)
+       #'(begin (provide name)
+                (define-chipmunk name type))]))
 
 
   ;; find the libs

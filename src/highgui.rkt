@@ -45,7 +45,10 @@
 
   ;; Create a window
   (define-opencv-highgui cvNamedWindow
-    (_fun _string _int -> _int))
+    (_fun (name (flags CV_WINDOW_AUTOSIZE)) ::
+          (name : _string)
+          (flags : _int)
+          -> _int))
   
   ;; Set and Get Property of the window
   (define-opencv-highgui cvSetWindowProperty
@@ -138,9 +141,20 @@
   unless CV_LOAD_IMAGE_ANYDEPTH is specified images are converted to 8bit
   |#  
   (define-opencv-highgui cvLoadImage
-    (_fun _string (iscolor : _int)
+    (_fun (filename (iscolor CV_LOAD_IMAGE_COLOR)) ::
+          (filename : _string)
+          (iscolor : _int)
           -> (r : (_ptr io _IplImage))
-          -> (ptr-ref r _IplImage))) 
+          -> (ptr-ref r _IplImage)))
+
+  (define-opencv-highgui cvLoadImageM
+    (_fun (filename (iscolor CV_LOAD_IMAGE_COLOR)) ::
+          (filename : _string)
+          (iscolor : _int)
+          -> (r : (_ptr io _CvMat))
+          -> (ptr-ref r _CvMat)))
+
+  (define imread cvLoadImageM)  
 
   (define CV_IMWRITE_JPEG_QUALITY 1)
   (define CV_IMWRITE_PNG_COMPRESSION 16)
