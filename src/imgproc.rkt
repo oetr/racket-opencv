@@ -7,7 +7,7 @@
   (require ffi/unsafe
            ffi/unsafe/define
            "core.rkt")
-
+  
   (define-ffi-definer define-opencv-imgproc
     (ffi-lib "/opt/local/lib/libopencv_imgproc"))
 

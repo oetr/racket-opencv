@@ -50,6 +50,7 @@
   ;; Set and Get Property of the window
   (define-opencv-highgui cvSetWindowProperty
     (_fun _string _int _double -> _void))
+  
   (define-opencv-highgui cvGetWindowProperty
     (_fun _string _int -> _double))
   
