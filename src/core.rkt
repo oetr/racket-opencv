@@ -239,16 +239,15 @@
 
   ;; Initializes font structure used further in cvPutText
   (define-opencv-core cvInitFont
-    (_fun (font-face hscale vscale (shear 0.0) (thickness 1) (line-type 8)) ::
-          (font : _pointer = (malloc _CvFont 'atomic))
+    (_fun (font-ptr font-face hscale vscale (shear 0.0) (thickness 1) (line-type 8)) ::
+          (font-ptr : _pointer)
           (font-face : _int)
           (hscale : _double)
           (vscale : _double)
           (shear : _double)
           (thickness : _int)
           (line-type : _int)
-          -> (font : _pointer)
-          -> (ptr-ref font _CvFont)))
+          -> _void))
 
   
   (define (cvFont scale (thickness 1))

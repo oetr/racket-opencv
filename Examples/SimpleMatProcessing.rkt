@@ -4,7 +4,7 @@
 ;; Author: Petr Samarin
 ;; Date: 2012
 ;; Description:
-;; inspired by the opencv documentation:
+;; converted from an example in opencv documentation:
 ;;http://docs.opencv.org/doc/tutorials/imgproc/gausian_median_blur_bilateral_filter/gausian_median_blur_bilateral_filter.html
 ;; this example loads an image
 ;; Applies 4 different kinds of filters and shows the filtered images sequentially
@@ -17,15 +17,15 @@
          ffi/unsafe
          ffi/unsafe/define)
 
-(define (display-caption caption)
-  ;;(define dst (cvMat (CvMat-rows src) (CvMat-cols src) (CvMat-type src)))
+(define (display-caption caption)  
   (cvSetZero dst)
-  (define font1 (cvInitFont CV_FONT_HERSHEY_SIMPLEX 0.0001 0.00001 0.0 1))
+  (define font1 (malloc _CvFont 'atomic))
+  (cvInitFont font1 CV_FONT_HERSHEY_SIMPLEX 0.5 0.5)
   (cvPutText dst caption
              (make-CvPoint (/ (CvMat-cols src) 4)
                            (/ (CvMat-rows src) 2))
              font1
-             (CV_RGB 10 10 255))
+             (CV_RGB 120 120 120))
   (imshow window-name dst)
   (if (>= (cvWaitKey DELAY_CAPTION) 0) -1 0))
 
@@ -35,20 +35,19 @@
 
 ;; Global Variables
 (define DELAY_CAPTION     1500)
-(define DELAY_BLUR        50)
+(define DELAY_BLUR        100)
 (define MAX_KERNEL_LENGTH 31)
 
 (define window-name "Filter Demo 1")
 
-
-
 ;; load an image into a Mat array
-(define src (imread "test1.png"))
-(define dst (cvCloneMat src))
+(define src (imread "images/Lena.jpg"))
+(define dst (cvMat (CvMat-rows src) (CvMat-cols src) (CvMat-type src)))
 
 (when (not (zero? (display-caption "Original Image")))
   (exit))
 
+(set! dst (cvCloneMat src))
 
 (when (not (zero? (display-dst DELAY_CAPTION)))
   (exit))
@@ -85,9 +84,11 @@
   (exit))
 
 (for ([i (in-range 1 MAX_KERNEL_LENGTH 2)])
-     (cvSmooth src dst CV_BILATERAL i 0 0.0 0.0)
+     (cvSmooth src dst CV_BILATERAL i 0 (* i 2.0) (/ i 2.0))
      (when (not (zero? (display-dst DELAY_BLUR)))
        (exit)))
 
 ;;; Wait until user press a key
-(display_caption "End: Press a key!")
+(display-caption "End: Press a key!")
+(cvWaitKey 0)
+(exit)
