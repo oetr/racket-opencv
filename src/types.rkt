@@ -311,10 +311,14 @@
             _pointer    ;; fl 
             _pointer)) ;; db
 
-  (define (cvMatData-ptr a-Mat (ptr 0))
-    (make-sized-byte-string (union-ref (CvMat-data a-Mat) ptr)
-                            (* (CvMat-rows a-Mat)
-                               (CvMat-cols a-Mat))))
+  (define (cvMatData-ptr a-Mat (a-type _byte))
+    (define ptr (match a-type
+                  (_byte 0)
+                  (_int 2)
+                  (_float 3)
+                  (_double 4)))
+    (ptr-ref (union-ref (CvMat-data a-Mat) ptr)
+             (_array a-type (CvMat-rows a-Mat) (CvMat-cols a-Mat))))
 
   (define-cstruct _CvMat
     ([type _int]

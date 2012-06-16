@@ -145,9 +145,13 @@
     (define arr (cvCreateMatHeader rows cols type))
     (cvCreateData arr)
     (when data-ptr
-      (ptr-set! (union-ref (CvMat-data arr) 0)
-                _pointer data-ptr))
-    ;;    (union-set! (CvMat-data arr) 0 (ptr-ref data-ptr _ubyte))
+      (define ptr
+        (match type
+          (_ubyte 0)
+          (_int 2)
+          (_float 3)
+          (_double 4)))
+      (union-set! (CvMat-data arr) ptr (array-ptr data-ptr)))
     arr)
   
 
@@ -185,11 +189,20 @@
                                    (dst : (_ptr i _IplImage))
                                    _pointer
                                    -> _void))
-  
+
+  ;; dst(mask) = src1(mask) + src2(mask)
+  (define-opencv-core cvAdd
+    (_fun (src1 src2 dst (mask #f)) ::
+          (src1 : _pointer)
+          (src2 : _pointer)
+          (dst : _pointer)
+          (mask  : _pointer)
+          -> _void))
+
   (define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
   (define (make-c-array size type)
-    (ptr-ref (malloc type 'atomic)
+    (ptr-ref (malloc 'atomic type size)
              (_array type size)))
 
   (define (c-array type . vals)
