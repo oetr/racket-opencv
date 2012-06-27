@@ -148,6 +148,7 @@
       (define ptr
         (match type
           (_ubyte 0)
+          (_short 1)
           (_int 2)
           (_float 3)
           (_double 4)))
@@ -185,10 +186,12 @@
     (_fun _pointer -> _void))
 
   ;; Copies source array to destination array
-  (define-opencv-core cvCopy (_fun (src : _pointer)
-                                   (dst : (_ptr i _IplImage))
-                                   _pointer
-                                   -> _void))
+  (define-opencv-core cvCopy
+    (_fun (src dst (mask #f)) ::
+          (src : _pointer)
+          (dst : _pointer)
+          (mask : _pointer)
+          -> _void))
 
   ;; dst(mask) = src1(mask) + src2(mask)
   (define-opencv-core cvAdd
@@ -268,12 +271,26 @@
 
   #| Draws a rectangle given two opposite corners of the rectangle (pt1 & pt2),
   if thickness<0 (e.g. thickness == CV_FILLED), the filled box is drawn |#
-  (define (cvRectangle img pt1 pt2 color (thickness 1) (line_type 8) (shift 0))
-    (define-opencv-core cvRectangle
-      (_fun _pointer _CvPoint _CvPoint _CvScalar _int
-            _int _int -> _void))
-    (cvRectangle img pt1 pt2 color thickness line_type shift))
+  (define-opencv-core cvRectangle
+    (_fun (img pt1 pt2 color (thickness 1) (line-type 8) (shift 0)) ::
+          (img : _pointer)
+          (pt1 : _CvPoint)
+          (pt2 : _CvPoint)
+          (color : _CvScalar)
+          (thickness : _int)
+          (line-type : _int)
+          (shift : _int) -> _void))
 
+  #| Draws 4-connected, 8-connected or antialiased line segment connecting two points|#
+  (define-opencv-core cvLine
+    (_fun (img pt1 pt2 color (thickness 1) (line-type 8) (shift 0)) ::
+          (img : _pointer)
+          (pt1 : _CvPoint)
+          (pt2 : _CvPoint)
+          (color : _CvScalar)
+          (thickness : _int)
+          (line-type : _int)
+          (shift : _int) -> _void))
 
   #| Renders text stroke with specified font and color at specified location.
   CvFont should be initialized with cvInitFont |#

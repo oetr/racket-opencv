@@ -169,7 +169,10 @@
   ;; 2) compression value
   ;; 3) no idea
   (define-opencv-highgui cvSaveImage
-    (_fun _string (_ptr i _IplImage) _pointer
+    (_fun (filename image (params #f)) ::
+          (filename : _file)
+          (image : _pointer)
+          (params : _pointer)
           -> _int))
 
   ;; decode image stored in the buffer

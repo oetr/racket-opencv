@@ -49,11 +49,12 @@
 ;; Invert all pixel values
 ;; Doing this in Racket is slower than in C by a lot, but the speed is close to
 ;; Racket's native vectors
+(time
 (let loop ([i (- (* width height channels) 1)])
   (when (>= i 0)
     ;; invert each pixel channel-wise
     (bytes-set! data i (- 255 (bytes-ref data i)))
-    (loop (- i 1))))
+    (loop (- i 1)))))
 
 ;;; Show the image
 ;; it is not necessary to create a named window before showing the image
