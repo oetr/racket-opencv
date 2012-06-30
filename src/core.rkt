@@ -20,13 +20,13 @@
 
   #| Allocates and initializes IplImage header |#
   (define-opencv-core cvCreateImageHeader (_fun _CvSize _int _int
-                                          -> (ipl-image : (_ptr io _IplImage))
-                                          -> (ptr-ref ipl-image _IplImage)))
+                                                -> (ipl-image : (_ptr io _IplImage))
+                                                -> (ptr-ref ipl-image _IplImage)))
 
   #| Inializes IplImage header |#
   (define-opencv-core cvInitImageHeader (_fun _pointer _CvSize _int _int _int _int
-                                          -> (ipl-image : (_ptr io _IplImage))
-                                          -> (ptr-ref ipl-image _IplImage)))
+                                              -> (ipl-image : (_ptr io _IplImage))
+                                              -> (ptr-ref ipl-image _IplImage)))
 
   #| Creates IPL image (header and data) |#
   ;; (define-opencv-core cvCreateImage (_fun _CvSize _int _int
@@ -145,13 +145,9 @@
     (define arr (cvCreateMatHeader rows cols type))
     (cvCreateData arr)
     (when data-ptr
-      (define ptr
-        (match type
-          (_ubyte 0)
-          (_short 1)
-          (_int 2)
-          (_float 3)
-          (_double 4)))
+      ;; find out the right type and point to 0--4
+      ;; for now use ptr = 0
+      (define ptr 0)
       (union-set! (CvMat-data arr) ptr (array-ptr data-ptr)))
     arr)
   
@@ -297,4 +293,61 @@
   (define-opencv-core cvPutText
     (_fun _pointer _string _CvPoint _pointer _CvScalar
           -> _void))
+
+
+  #|**************************************************************************
+                      Dynamic data structures                                  
+  ****************************************************************************|#
+
+  ;; Calculates length of sequence slice (with support of negative indices).
+  (define-opencv-core cvSliceLength
+    (_fun _CvSlice _pointer -> _int))
+
+  #| Creates new memory storage.
+  block_size == 0 means that default,
+  somewhat optimal size, is used (currently, it is 64K) |#
+  (define-opencv-core cvCreateMemStorage
+    (_fun ((block-size 0)) :: (block-size : _int) -> _pointer))
+
+  ;; Creates a memory storage that will borrow memory blocks from parent storage
+  (define-opencv-core cvCreateChildMemStorage
+    (_fun _pointer -> _pointer))
+
+  #|Releases memory storage. All the children of a parent must be released before
+  the parent. A child storage returns all the blocks to parent when it is released |#
+  (define-opencv-core cvReleaseMemStorage
+    (_fun _pointer -> _void))
+
+  #|************************ Adding own types **************************|#
+  (define-opencv-core cvRegisterType
+    (_fun _pointer -> _void))
+
+  (define-opencv-core cvUnregisterType
+    (_fun _string -> _void))
+  
+  #| universal functions |#
+  (define-opencv-core cvRelease
+    (_fun _pointer -> _void))
+
+  (define-opencv-core cvClone
+    (_fun _pointer -> _pointer))
+
+  #| simple API for reading/writing data |#
+  (define-opencv-core cvSave
+    (_fun (filename struct-ptr (name #f) (comment #f) (attributes (cvAttrList))) ::
+          [filename : _file]
+          [struct-ptr : _pointer]
+          [name : _string]
+          [comment : _string]
+          [attributes : _CvAttrList]
+          -> _void))
+
+  (define-opencv-core cvLoad
+    (_fun (filename (memstorage #f) (name #f) (real_name #f)) ::
+          [filename : _file]
+          [memstorage : _pointer]
+          [name : _string]
+          [real_name : _string]
+          -> _pointer))
+
 )

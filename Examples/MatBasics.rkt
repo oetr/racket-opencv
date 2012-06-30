@@ -31,8 +31,32 @@
 (define data (cvMatData-ptr dst _double))
 
 ;; access some of the elements
-(array-ref data 0 0)
-(array-ref data 0 1)
-(array-ref data 0 2)
-(array-ref data 0 3)
+(for* ([row (array-length data)]
+       [column (array-length (array-ref data 0))])
+      (printf "~a~n"
+              (array-ref data row column)))
 
+
+;;; a c-array of doubles
+(define b (c-array _float
+                   1.0 2.0 3.0 4.0
+                   5.0 6.0 7.0 8.0
+                   9.0 10.0 11.0 12.0))
+
+;; make a 3x4 matrix from the c-array b
+(define mat3 (cvMat 3 4 CV_32FC1 b))
+
+;; prepare another matrix to store the results
+(define mat4 (cvMat 3 4 CV_32FC1))
+
+;; add the mat1 with itself, store the results in dst
+(cvAdd mat3 mat3 mat4)
+
+;; get data array from the matrix
+(define data (cvMatData-ptr mat4 _float))
+
+;; access some of the elements
+(for* ([row (array-length data)]
+       [column (array-length (array-ref data 0))])
+      (printf "~a~n"
+              (array-ref data row column)))

@@ -10,7 +10,7 @@
   * array type is recognized at runtime:
   |#
   (define CvArr _void)
-    
+  
   (define-cstruct _Cv32suf ([i _int]
                             [u _uint]
                             [f _float]))
@@ -319,6 +319,7 @@
             [(equal? a-type _float) 3]
             [(equal? a-type _double) 4]))
     (if (zero? ptr)
+        ;; make a special case if it is a byte array
         (make-sized-byte-string (union-ref (CvMat-data a-Mat) ptr)
                                 (* (CvMat-rows a-Mat)
                                    (CvMat-step a-Mat)))
@@ -491,11 +492,11 @@
   
   (define-cstruct _CvMemStorage
     ([signature _int]
-     [bottom _pointer] #| First allocated block.                   |#
-     [top _pointer] #| Current memory block - top of the stack. |#
-     [parent _pointer] #| We get new blocks from parent as needed. |#
-     [block_size _pointer] #| Block size.                              |#
-     [free_space _pointer])) #| Remaining free space in current block.   |#
+     [bottom _pointer] 		#| First allocated block.                   |#
+     [top _pointer] 		#| Current memory block - top of the stack. |#
+     [parent _pointer] 		#| We get new blocks from parent as needed. |#
+     [block_size _pointer] 	#| Block size.                              |#
+     [free_space _pointer])) 	#| Remaining free space in current block.   |#
 
   (define-cstruct _CvMemStoragePos
     ([top _pointer]
@@ -589,7 +590,7 @@
 
   #|************************************ Graph ****************************|#
 
-#|
+  #|
   We represent a graph as a set of vertices.
   Vertices contain their adjacency lists (more exactly, pointers to first incoming or
   outcoming edge (or 0 if isolated vertex)). Edges are stored in another set.
@@ -597,55 +598,55 @@
 
   Each edge consists of
 
-     o   Two pointers to the starting and ending vertices
-         (vtx[0] and vtx[1] respectively).
+  o   Two pointers to the starting and ending vertices
+  (vtx[0] and vtx[1] respectively).
 
-   A graph may be oriented or not. In the latter case, edges between
-   vertex i to vertex j are not distinguished during search operations.
+  A graph may be oriented or not. In the latter case, edges between
+  vertex i to vertex j are not distinguished during search operations.
 
-     o   Two pointers to next edges for the starting and ending vertices, where
-         next[0] points to the next edge in the vtx[0] adjacency list and
-         next[1] points to the next edge in the vtx[1] adjacency list.
-|#
-(define-cstruct _CvGraphEdge
-  ([flags _int]
-   [weight _float]
-   [next _pointer]
-   [vtx _pointer]))
+  o   Two pointers to next edges for the starting and ending vertices, where
+  next[0] points to the next edge in the vtx[0] adjacency list and
+  next[1] points to the next edge in the vtx[1] adjacency list.
+  |#
+  (define-cstruct _CvGraphEdge
+    ([flags _int]
+     [weight _float]
+     [next _pointer]
+     [vtx _pointer]))
 
-(define-cstruct _CvGraphVtx
-  ([flags _int]
-   [first _pointer]))
+  (define-cstruct _CvGraphVtx
+    ([flags _int]
+     [first _pointer]))
 
-(define-cstruct _CvGraphVtx2D
-  ([flags _int]
-   [first _pointer]
-   [ptr (_cpointer _CvPoint2D32f)]))
+  (define-cstruct _CvGraphVtx2D
+    ([flags _int]
+     [first _pointer]
+     [ptr (_cpointer _CvPoint2D32f)]))
 
-#|
-   Graph is "derived" from the set (this is set a of vertices)
-   and includes another set (edges)
-|#
-(define-cstruct _CvGraph
-  ([flags _int]
-   [header_size _int]
-   [h_prev _pointer]
-   [h_next _pointer]
-   [v_prev _pointer]
-   [v_next _pointer]
-   [total _int]
-   [elem_size _int]
-   [block_max _pointer]
-   [ptr _pointer]
-   [delta_elems _int]
-   [storage _int]
-   [free_blocks _int]
-   [first _int]
-   [free_elems _pointer]
-   [active_count _int]
-   [edges (_cpointer _CvSet)]))
+  #|
+  Graph is "derived" from the set (this is set a of vertices)
+  and includes another set (edges)
+  |#
+  (define-cstruct _CvGraph
+    ([flags _int]
+     [header_size _int]
+     [h_prev _pointer]
+     [h_next _pointer]
+     [v_prev _pointer]
+     [v_next _pointer]
+     [total _int]
+     [elem_size _int]
+     [block_max _pointer]
+     [ptr _pointer]
+     [delta_elems _int]
+     [storage _int]
+     [free_blocks _int]
+     [first _int]
+     [free_elems _pointer]
+     [active_count _int]
+     [edges (_cpointer _CvSet)]))
 
-(define CV_TYPE_NAME_GRAPH "opencv-graph")
+  (define CV_TYPE_NAME_GRAPH "opencv-graph")
 
 
 
@@ -972,21 +973,21 @@
   (define _CvSubdiv2DPointLocation
     (_enum
      '(CV_PTLOC_ERROR = -2
-       CV_PTLOC_OUTSIDE_RECT = -1
-       CV_PTLOC_INSIDE = 0
-       CV_PTLOC_VERTEX = 1
-       CV_PTLOC_ON_EDGE = 2)))
+                      CV_PTLOC_OUTSIDE_RECT = -1
+                      CV_PTLOC_INSIDE = 0
+                      CV_PTLOC_VERTEX = 1
+                      CV_PTLOC_ON_EDGE = 2)))
   
   (define _CvNextEdgeType
     (_enum
      '(CV_NEXT_AROUND_ORG   = #x00
-       CV_NEXT_AROUND_DST   = #x22
-       CV_PREV_AROUND_ORG   = #x11
-       CV_PREV_AROUND_DST   = #x33
-       CV_NEXT_AROUND_LEFT  = #x13
-       CV_NEXT_AROUND_RIGHT = #x31
-       CV_PREV_AROUND_LEFT  = #x20
-       CV_PREV_AROUND_RIGHT = #x02)))
+                            CV_NEXT_AROUND_DST   = #x22
+                            CV_PREV_AROUND_ORG   = #x11
+                            CV_PREV_AROUND_DST   = #x33
+                            CV_NEXT_AROUND_LEFT  = #x13
+                            CV_NEXT_AROUND_RIGHT = #x31
+                            CV_PREV_AROUND_LEFT  = #x20
+                            CV_PREV_AROUND_RIGHT = #x02)))
 
   ;; TODO : implement in Racket if necessary
   #| get the next edge with the same origin point (counterwise) |#
@@ -1072,5 +1073,32 @@
   (define CV_HOUGH_MULTI_SCALE 2)
   (define CV_HOUGH_GRADIENT 3)
 
+
+
+  #|*************************************************************************
+  * Data structures for persistence (a.k.a serialization) functionality 
+  **************************************************************************|#
+
+  ;; Storage flags:
+  (define CV_STORAGE_READ          0)
+  (define CV_STORAGE_WRITE         1)
+  (define CV_STORAGE_WRITE_TEXT    CV_STORAGE_WRITE)
+  (define CV_STORAGE_WRITE_BINARY  CV_STORAGE_WRITE)
+  (define CV_STORAGE_APPEND        2)
+  (define CV_STORAGE_MEMORY        4)
+  (define CV_STORAGE_FORMAT_MASK   (arithmetic-shift 7 3))
+  (define CV_STORAGE_FORMAT_AUTO   0)
+  (define CV_STORAGE_FORMAT_XML    8)
+  (define CV_STORAGE_FORMAT_YAML  16)
+
+  ;; List of attributes:
+  (define-cstruct _CvAttrList
+    ;; NULL-terminated array of (attribute_name,attribute_value) pairs.
+    ([attr _pointer]
+     ;; Pointer to next chunk of the attributes list.
+     [next _pointer]))
+
+  (define (cvAttrList (attr #f) (next #f))
+    (make-CvAttrList attr next))
   
   )
