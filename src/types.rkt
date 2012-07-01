@@ -511,6 +511,18 @@
      [count _int] #| Number of elements in the block.           |#
      [data _pointer])) #| Pointer to the first element of the block. |#
 
+  (define (seqBlock-next a-block)
+    (define next (CvSeqBlock-next a-block))
+    (if next
+        (ptr-ref next _CvSeqBlock)
+        next))
+
+  (define (seqBlock-prev a-block)
+    (define prev (CvSeqBlock-prev a-block))
+    (if prev
+        (ptr-ref prev _CvSeqBlock)
+        prev))
+
   #|
   Read/Write sequence.
   Elements can be dynamically inserted to or deleted from the sequence.
@@ -530,6 +542,12 @@
      [storage _pointer]     #| Where the seq is stored.             |#
      [free_blocks _pointer] #| Free blocks list.                    |#
      [first _pointer]))     #| Pointer to the first sequence block. |#
+
+  (define (seq-first a-seq)
+    (define f (CvSeq-first a-seq))
+    (if f
+        (ptr-ref f _CvSeqBlock)
+        f))
 
   (define CV_TYPE_NAME_SEQ             "opencv-sequence")
   (define CV_TYPE_NAME_SEQ_TREE        "opencv-sequence-tree")

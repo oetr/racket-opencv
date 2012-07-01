@@ -14,8 +14,8 @@
          ffi/unsafe)
 
 ;; Global variables
-(define face-cascade-name "haarcascade_frontalface_alt.xml")
-(define eyes-cascade-name "haarcascade_eye_tree_eyeglasses.xml")
+(define face-cascade-name "data/haarcascade_frontalface_alt.xml")
+(define eyes-cascade-name "data/haarcascade_eye_tree_eyeglasses.xml")
 (define window-name "Capture - Face detection")
 ;; load classifiers
 (define face-cascade (cvLoadHaarClassifierCascade face-cascade-name
@@ -23,10 +23,13 @@
 (define eyes-cascade (cvLoadHaarClassifierCascade eyes-cascade-name
                                                   (make-CvSize 24 24)))
 
+;; open camera and set capture parameters
 (define capture (cvCaptureFromCAM 0))
 (define param-set #f)
 (set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0))
 (set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0))
+
+;; get one frame to figure out the image parameters
 (define frame (cvQueryFrame capture))
 ;; Get parameters from the captured image to initialize
 ;; copied images
@@ -36,6 +39,7 @@
 (define depth    (IplImage-depth frame))
 (define channels (IplImage-nChannels frame))
 
+
 (define (detect-and-display frame)
   (define frame-gray (cvCreateImage size IPL_DEPTH_8U 1))
   (cvConvertImage frame frame-gray IPL_DEPTH_8U)
@@ -43,35 +47,42 @@
   (define mem (cvCreateMemStorage))
   (define seq (cvHaarDetectObjects frame-gray face-cascade mem 1.1 2
                                    (bitwise-ior 0 CV_HAAR_SCALE_IMAGE)
-                                   (make-CvSize 10 10)))
+                                   (make-CvSize 3 3)))
 
-  (printf "found ~a faces~n" (CvSeq-total seq))
-  (define f #f)
-  (when (> (CvSeq-total seq) 0)
-    (set! f (ptr-ref (CvSeq-first seq) _CvSeqBlock)))
-  (for ([i (in-range (CvSeq-total seq))])
-       (define data (ptr-ref (CvSeqBlock-data f) _CvRect))
-       (define x (CvRect-x data))
-       (define y (CvRect-y data))
-       (define w (CvRect-width data))
-       (define h (CvRect-height data))
-       (printf "found rect: ~a, ~a, ~a, ~a~n"x y w h)
-       
-       (cvRectangle frame
-                    (cvPoint x y)
-                    (cvPoint (+ x w) (+ y h))
-                    (cvRGB 0 255 0))
-       (define next (CvSeqBlock-next f))
-       (when next
-         (set! f (ptr-ref next _CvSeqBlock))))
-  (imshow window-name frame))
+  
+
+  (define (traverse-sequence a-seq)
+    (define total (CvSeq-total a-seq))
+    (define (traverse-sequence-aux total a-block)
+      (define next (seqBlock-next a-block))
+      (define start-index (CvSeqBlock-start_index a-block))
+      (define count (CvSeqBlock-count a-block))
+      (for ([i (in-range count)])
+           (define rect (ptr-ref (CvSeqBlock-data a-block) _CvRect i))
+           (define x (CvRect-x rect))
+           (define y (CvRect-y rect))
+           (define w (CvRect-width rect))
+           (define h (CvRect-height rect))
+           (printf "found face: ~a, ~a, ~a, ~a~n" x y w h)
+           (cvRectangle frame-gray
+                        (cvPoint x y)
+                        (cvPoint (+ x w) (+ y h))
+                        (cvRGB 0 255 0)))
+           (when (and next (not (zero? total)))
+        (traverse-sequence-aux (- total 1) next)))
+    (define first-block (seq-first a-seq))
+    (when first-block
+      (traverse-sequence-aux total first-block)))
+
+  (traverse-sequence seq)
+  (imshow window-name frame-gray))
 
 
 (let loop ()
   (set! frame (cvQueryFrame capture))
   (detect-and-display frame)
   ;;(cvReleaseImage out)  
-  (unless (>= (cvWaitKey 1) 0)
+  (unless (>= (cvWaitKey 5) 0)
     (loop)))
 
 (cvReleaseCapture capture)
