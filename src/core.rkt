@@ -8,16 +8,16 @@
   (require ffi/unsafe
            ffi/unsafe/define
            ffi/vector
-           "types.rkt")
+           "types.rkt"
+           "utilities.rkt")
 
   (define-ffi-definer define-opencv-core
     (ffi-lib "/opt/local/lib/libopencv_core"))
 
-;;; FFI Definers
-  #|***************************************************************************************\
-*          Array allocation, deallocation, initialization and access to elements         *
-  \***************************************************************************************|#
-
+  #|***********************************************************************
+  *  Array allocation, deallocation, initialization and access to elements 
+  \************************************************************************|#
+  
   #| Allocates and initializes IplImage header |#
   (define-opencv-core cvCreateImageHeader (_fun _CvSize _int _int
                                                 -> (ipl-image : (_ptr io _IplImage))
@@ -58,7 +58,9 @@
 
   #| Retrieves image Channel Of Interest |#
   (define-opencv-core cvGetImageCOI
-    (_fun _pointer -> _int))
+    (_fun _pointer
+          -> (r : _int)
+          -> (check-return r 'cvGetImageCOI)))
 
   #| Sets image ROI (region of interest) (COI is not changed) |#
   (define-opencv-core cvSetImageROI
@@ -188,12 +190,15 @@
 
 
   #|**************************************************************************
-                      Dynamic data structures                                  
+  Dynamic data structures                                  
   ****************************************************************************|#
 
   ;; Calculates length of sequence slice (with support of negative indices).
   (define-opencv-core cvSliceLength
-    (_fun _CvSlice _pointer -> _int))
+    (_fun _CvSlice _pointer
+          -> (r : _int)
+          -> (check-return r 'cvSliceLength)))
+
 
   #| Creates new memory storage.
   block_size == 0 means that default,
@@ -284,7 +289,7 @@
 
 
   #| Removes all the elements from the sequence. The freed memory
-   can be reused later only by the same sequence unless cvClearMemStorage
+  can be reused later only by the same sequence unless cvClearMemStorage
   or cvRestoreMemStoragePos is called |#
   (define-opencv-core cvClearSeq
     (_fun _pointer -> _void))
@@ -419,4 +424,4 @@
           [real_name : _string]
           -> _pointer))
 
-)
+  )

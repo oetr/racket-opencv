@@ -6,23 +6,23 @@
 ;;; Libraries
   ;; Racket Foreign interface
   (require ffi/unsafe
-           ffi/unsafe/define)
+           ffi/unsafe/define
+           ;; OpenCV requirements
+           "types.rkt"
+           "core.rkt"
+           "utilities.rkt")
 
   (define-ffi-definer define-opencv-highgui
     (ffi-lib "/opt/local/lib/libopencv_highgui"))
-  
-  ;; Ported OpenCV requirements
-  (require "types.rkt"
-           "core.rkt")
-
-    
 
   ;; this function is used to set some external parameters in case of X Window
   (define-opencv-highgui cvInitSystem
-    (_fun _int (_ptr i (_ptr i _ubyte)) -> _int))
+    (_fun _int (_ptr i (_ptr i _ubyte))
+          -> (r : _int)
+          -> (check-return r 'cvInitSystem)))
 
   (define-opencv-highgui cvStartWindowThread
-    (_fun -> _int))
+    (_fun -> (r : _int) -> (check-return r 'cvInitSystem)))
 
   ;; ----- YV -------
   ;;These 3 flags are used by cvSet/GetWindowProperty
@@ -48,7 +48,8 @@
     (_fun (name (flags CV_WINDOW_AUTOSIZE)) ::
           (name : _string)
           (flags : _int)
-          -> _int))
+          -> (r : _int)
+          -> (check-return r 'cvNamedWindow)))
   
   ;; Set and Get Property of the window
   (define-opencv-highgui cvSetWindowProperty
@@ -95,16 +96,20 @@
           [value : (_ptr o _int)]
           [count : _int]
           [on-change : (_fun _int -> _void)]
-          -> _int))
+          -> (r : _int)
+          -> (check-return r 'cvCreateTrackbar)))
 
   (define CvTrackbarCallback2 (_fun _int _pointer -> _void))
 
   (define-opencv-highgui cvCreateTrackbar2
-    (_fun _string _string _pointer _int CvTrackbarCallback2 _pointer -> _int))
+    (_fun _string _string _pointer _int CvTrackbarCallback2 _pointer
+          -> (r : _int)
+          -> (check-return r 'cvCreateTrackbar2)))
 
   ;; retrieve or set trackbar position
   (define-opencv-highgui cvGetTrackbarPos
     (_fun _string _string -> _int))
+  
   (define-opencv-highgui cvSetTrackbarPos
     (_fun _string _string _int -> _void))
 
@@ -129,7 +134,9 @@
   (define CvMouseCallback (_fun _int _int _int _int _pointer -> _void))
   ;;  assign callback for mouse events
   (define-opencv-highgui cvSetMouseCallback
-    (_fun _string CvMouseCallback _pointer -> _int))
+    (_fun _string CvMouseCallback _pointer
+          -> (r : _int)
+          -> (check-return r 'cvSetMouseCallback)))
   
   ;; 8bit, color or not
   (define CV_LOAD_IMAGE_UNCHANGED  -1)
@@ -179,7 +186,8 @@
           (filename : _file)
           (image : _pointer)
           (params : _pointer)
-          -> _int))
+          -> (r : _int)
+          -> (check-return r 'cvSaveImage)))
 
   ;; decode image stored in the buffer
   (define-opencv-highgui cvDecodeImage
@@ -265,7 +273,9 @@
   ;; grab a frame, return 1 on success, 0 on fail.
   ;; this function is thought to be fast
   (define-opencv-highgui cvGrabFrame
-    (_fun _pointer -> _int))
+    (_fun _pointer
+          -> (r : _int)
+          -> (check-return r 'cvGrabFrame)))
 
   ;; get the frame grabbed with cvGrabFrame(..)
   ;; This function may apply some frame processing like
@@ -427,8 +437,11 @@
   ;; retrieve or set capture properties
   (define-opencv-highgui cvGetCaptureProperty
     (_fun _pointer _int -> _double))
+  
   (define-opencv-highgui cvSetCaptureProperty
-    (_fun _pointer _int _double -> _int))
+    (_fun _pointer _int _double
+          -> (r : _int)
+          -> (check-return r 'cvSetCaptureProperty)))
 
   ;; Return the type of the capturer (eg, CV_CAP_V4W, CV_CAP_UNICAP),
   ;; which is unknown if created with CV_CAP_ANY
@@ -460,11 +473,15 @@
 
   ;; initialize video file writer
   (define-opencv-highgui cvCreateVideoWriter
-    (_fun _file _int _double _CvSize _int -> _int))
+    (_fun _file _int _double _CvSize _int
+          -> (r : _int)
+          -> (check-return r 'cvCreateVideoWriter)))
 
   ;; write frame to video file
   (define-opencv-highgui cvWriteFrame
-    (_fun _pointer (_ptr i _IplImage) -> _int)) 
+    (_fun _pointer (_ptr i _IplImage)
+          -> (r : _int)
+          -> (check-return r 'cvWriteFrame)))
 
   ;; close video file writer
   (define-opencv-highgui cvReleaseVideoWriter
