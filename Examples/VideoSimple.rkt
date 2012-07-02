@@ -17,12 +17,8 @@
 (define capture (cvCaptureFromCAM 0))
 
 ;; Reduce image resolution to 640x480
-;; for some reason, if the value returned by a C function is not void,
-;; it is implicitly printed out, without being commanded to!
-;; to prevent a print out by default, we bind returned value to a symbol
-(define param-set #f)
-(set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0))
-(set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0))
+(cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0)
+(cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0)
 
 ;; Capture an image to get parameters
 (define captured-image (cvQueryFrame capture))

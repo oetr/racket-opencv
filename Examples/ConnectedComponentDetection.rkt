@@ -80,9 +80,8 @@
 ;;                     (take sequences 15)))
 
 (define capture (cvCaptureFromCAM 0))
-(define param-set #f)
-(set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0))
-(set! param-set (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0))
+(cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0)
+(cvSetCaptureProperty capture CV_CAP_PROP_FRAME_HEIGHT 480.0)
 (define captured-image (cvQueryFrame capture))
 
 ;; Get parameters from the captured image to initialize
