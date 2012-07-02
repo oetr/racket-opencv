@@ -1,8 +1,11 @@
 This project ports a subset of the OpenCV C library to Racket by using the [[http://docs.racket-lang.org/foreign/index.html?q=ctype&q=_cpointer&q=make-cvector&q=time*&q=time&q=yield][Racket Foreign Interface]].
 Names of OpenCV structures and functions have been left unchanged, i.e., C function cvCaptureFromCAM(int index) can be used in Racket as (cvCaptureFromCAM index).
 
+To get started, check the /Examples/ folder.
+It contains many of the official OpenCV tutorials converted to Racket.
 
+ 
 * Tested System
-- Mac OS X 10.7.3
+- Mac OS X 10.7.4
 - Racket v5.2.1, Intel 64-Bit
-- OpenCV @2.4.0_0, 64-Bit, downloaded and compiled through MacPorts
+- OpenCV @2.4.1, 64-Bit, downloaded and compiled through MacPorts
