@@ -313,7 +313,8 @@
 
   (define (cvMatData-ptr a-Mat (a-type _byte))
     (define ptr
-      (cond [(equal? a-type _byte) 0]
+      (cond [(or (equal? a-type _byte)
+                 (equal? a-type _ubyte)) 0]
             [(equal? a-type _short) 1]
             [(equal? a-type _int) 2]
             [(equal? a-type _float) 3]
@@ -447,7 +448,8 @@
     ([val (_array _double 4)]))
 
   (define (cvScalar val0 (val1 0) (val2 0) (val3 0))
-    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
+    (define an-array (ptr-ref (malloc _double 4 'atomic)
+                              (_array _double 4)))
     (array-set! an-array 0 (exact->inexact val0))
     (array-set! an-array 1 (exact->inexact val1))
     (array-set! an-array 2 (exact->inexact val2))
@@ -455,15 +457,11 @@
     (make-CvScalar an-array))
 
   (define (cvRGB r g b)
-    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
-    (array-set! an-array 0 (exact->inexact b))
-    (array-set! an-array 1 (exact->inexact g))
-    (array-set! an-array 2 (exact->inexact r))
-    (array-set! an-array 3 0.0)
-    (make-CvScalar an-array))
+    (cvScalar b g r))
   
   (define (cvRealScalar a-number)
-    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
+    (define an-array (ptr-ref (malloc _double 4 'atomic)
+                              (_array _double 4)))
     (array-set! an-array 0 (exact->inexact a-number))
     (array-set! an-array 1 0.0)
     (array-set! an-array 2 0.0)
@@ -471,7 +469,8 @@
     (make-CvScalar an-array))
 
   (define (cvScalarAll a-number)
-    (define an-array (ptr-ref (malloc _double 'atomic) (_array _double 4)))
+    (define an-array (ptr-ref (malloc _double 4 'atomic)
+                              (_array _double 4)))
     (define inexact-number (exact->inexact a-number))
     (array-set! an-array 0 inexact-number)
     (array-set! an-array 1 inexact-number)
@@ -665,6 +664,136 @@
      [edges (_cpointer _CvSet)]))
 
   (define CV_TYPE_NAME_GRAPH "opencv-graph")
+
+  #|********************************* Chain/Countour *********************************|#
+
+  (define-cstruct _CvChain
+    ([flags       _int]      #| Miscellaneous flags     |#     
+     [header_size _int]      #| Size of sequence header |#      
+     [h_prev      _pointer]  #| Previous sequence       |#      
+     [h_next      _pointer]  #| Next sequence           |#      
+     [v_prev      _pointer]  #| 2nd previous sequence   |#      
+     [v_next      _pointer]  #| 2nd next sequence       |#
+     [total       _int]      #| Total number of elements            |#
+     [elem_size   _int]      #| Size of sequence element in bytes   |#
+     [block_max   _sbyte]    #| Maximal bound of the last block     |#
+     [ptr         _sbyte]    #| Current write pointer               |#
+     [delta_elems _int]      #| Grow seq this many at a time        |#
+     [storage     _pointer]  #| Where the seq is stored             |#
+     [free_blocks _pointer]  #| Free blocks list                    |#
+     [first       _pointer]  #| Pointer to the first sequence block |#
+     [origin      _CvPoint]))
+
+(define-cstruct _CvContour
+  ([flags       _int]      ;; Miscellaneous flags          
+   [header_size _int]      ;; Size of sequence header       
+   [h_prev      _pointer]  ;; Previous sequence             
+   [h_next      _pointer]  ;; Next sequence                 
+   [v_prev      _pointer]  ;; 2nd previous sequence         
+   [v_next      _pointer]  ;; 2nd next sequence       
+   [total       _int]      ;; Total number of elements            
+   [elem_size   _int]      ;; Size of sequence element in bytes   
+   [block_max   _sbyte]    ;; Maximal bound of the last block     
+   [ptr         _sbyte]    ;; Current write pointer               
+   [delta_elems _int]      ;; Grow seq this many at a time        
+   [storage     _pointer]  ;; Where the seq is stored             
+   [free_blocks _pointer]  ;; Free blocks list                    
+   [first       _pointer]  ;; Pointer to the first sequence block 
+   [rect        _CvRect]
+   [color       _int]
+   [reserved    (_array _int 3)]))
+
+
+#|***************************************************************************************\
+*                                    Sequence types                                      *
+\***************************************************************************************|#
+
+(define CV_SEQ_MAGIC_VAL             #x42990000)
+
+;; (define (CV_IS_SEQ a-seq) \
+;;     ((seq) != NULL && (((CvSeq*)(seq))->flags & CV_MAGIC_MASK) == CV_SEQ_MAGIC_VAL)
+
+(define CV_SET_MAGIC_VAL             #x42980000)
+;; #define CV_IS_SET(set) \
+;;     ((set) != NULL && (((CvSeq*)(set))->flags & CV_MAGIC_MASK) == CV_SET_MAGIC_VAL)
+
+(define CV_SEQ_ELTYPE_BITS           12)
+(define CV_SEQ_ELTYPE_MASK           (- (arithmetic-shift 1 CV_SEQ_ELTYPE_BITS) 1))
+
+(define CV_SEQ_ELTYPE_POINT          CV_32SC2)  #| (x,y) |#
+(define CV_SEQ_ELTYPE_CODE           CV_8UC1)   #| freeman code: 0..7 |#
+(define CV_SEQ_ELTYPE_GENERIC        0)
+(define CV_SEQ_ELTYPE_PTR            CV_USRTYPE1)
+(define CV_SEQ_ELTYPE_PPOINT         CV_SEQ_ELTYPE_PTR)  #| &(x,y) |#
+(define CV_SEQ_ELTYPE_INDEX          CV_32SC1)  #| #(x,y) |#
+(define CV_SEQ_ELTYPE_GRAPH_EDGE     0)  #| &next_o, &next_d, &vtx_o, &vtx_d |#
+(define CV_SEQ_ELTYPE_GRAPH_VERTEX   0)  #| first_edge, &(x,y) |#
+(define CV_SEQ_ELTYPE_TRIAN_ATR      0)  #| vertex of the binary tree   |#
+(define CV_SEQ_ELTYPE_CONNECTED_COMP 0)  #| connected component  |#
+(define CV_SEQ_ELTYPE_POINT3D        CV_32FC3)  #| (x,y,z)  |#
+
+(define CV_SEQ_KIND_BITS        2)
+(define CV_SEQ_KIND_MASK        (arithmetic-shift (- (arithmetic-shift 1 CV_SEQ_KIND_BITS)
+                                                     1)
+                                                  CV_SEQ_ELTYPE_BITS))
+
+#| types of sequences |#
+(define CV_SEQ_KIND_GENERIC     (arithmetic-shift 0 CV_SEQ_ELTYPE_BITS))
+(define CV_SEQ_KIND_CURVE       (arithmetic-shift 1 CV_SEQ_ELTYPE_BITS))
+(define CV_SEQ_KIND_BIN_TREE    (arithmetic-shift 2 CV_SEQ_ELTYPE_BITS))
+
+#| types of sparse sequences (sets) |#
+(define CV_SEQ_KIND_GRAPH       (arithmetic-shift 1 CV_SEQ_ELTYPE_BITS))
+(define CV_SEQ_KIND_SUBDIV2D    (arithmetic-shift 2 CV_SEQ_ELTYPE_BITS))
+
+(define CV_SEQ_FLAG_SHIFT       (+ CV_SEQ_KIND_BITS CV_SEQ_ELTYPE_BITS))
+
+#| flags for curves |#
+(define CV_SEQ_FLAG_CLOSED     (arithmetic-shift 1 CV_SEQ_FLAG_SHIFT))
+(define CV_SEQ_FLAG_SIMPLE     (arithmetic-shift 0 CV_SEQ_FLAG_SHIFT))
+(define CV_SEQ_FLAG_CONVEX     (arithmetic-shift 0 CV_SEQ_FLAG_SHIFT))
+(define CV_SEQ_FLAG_HOLE       (arithmetic-shift 2 CV_SEQ_FLAG_SHIFT))
+
+#| flags for graphs |#
+(define CV_GRAPH_FLAG_ORIENTED (arithmetic-shift 1 CV_SEQ_FLAG_SHIFT))
+
+(define CV_GRAPH               CV_SEQ_KIND_GRAPH)
+(define CV_ORIENTED_GRAPH      (bitwise-ior CV_SEQ_KIND_GRAPH CV_GRAPH_FLAG_ORIENTED))
+
+#| point sets |#
+(define CV_SEQ_POINT_SET       (bitwise-ior CV_SEQ_KIND_GENERIC CV_SEQ_ELTYPE_POINT))
+(define CV_SEQ_POINT3D_SET     (bitwise-ior CV_SEQ_KIND_GENERIC CV_SEQ_ELTYPE_POINT3D))
+(define CV_SEQ_POLYLINE        (bitwise-ior CV_SEQ_KIND_CURVE   CV_SEQ_ELTYPE_POINT))
+(define CV_SEQ_POLYGON         (bitwise-ior CV_SEQ_FLAG_CLOSED  CV_SEQ_POLYLINE ))
+(define CV_SEQ_CONTOUR         CV_SEQ_POLYGON)
+(define CV_SEQ_SIMPLE_POLYGON  (bitwise-ior CV_SEQ_FLAG_SIMPLE  CV_SEQ_POLYGON))
+
+#| chain-coded curves |#
+(define CV_SEQ_CHAIN           (bitwise-ior CV_SEQ_KIND_CURVE   CV_SEQ_ELTYPE_CODE))
+(define CV_SEQ_CHAIN_CONTOUR   (bitwise-ior CV_SEQ_FLAG_CLOSED  CV_SEQ_CHAIN))
+
+#| binary tree for the contour |#
+(define CV_SEQ_POLYGON_TREE    (bitwise-ior CV_SEQ_KIND_BIN_TREE   CV_SEQ_ELTYPE_TRIAN_ATR))
+
+#| sequence of the connected components |#
+(define CV_SEQ_CONNECTED_COMP  (bitwise-ior CV_SEQ_KIND_GENERIC
+                                            CV_SEQ_ELTYPE_CONNECTED_COMP))
+
+#| sequence of the integer numbers |#
+(define CV_SEQ_INDEX           (bitwise-ior CV_SEQ_KIND_GENERIC   CV_SEQ_ELTYPE_INDEX))
+
+;; (define CV_SEQ_ELTYPE( seq )   ((seq)->flags & CV_SEQ_ELTYPE_MASK)
+;; (define CV_SEQ_KIND( seq )     ((seq)->flags & CV_SEQ_KIND_MASK )
+
+;; #| flag checking |#
+;; (define CV_IS_SEQ_INDEX( seq )      ((CV_SEQ_ELTYPE(seq) == CV_SEQ_ELTYPE_INDEX) && \
+;;                                      (CV_SEQ_KIND(seq) == CV_SEQ_KIND_GENERIC))
+
+;; (define CV_IS_SEQ_CURVE( seq )      (CV_SEQ_KIND(seq) == CV_SEQ_KIND_CURVE)
+;; (define CV_IS_SEQ_CLOSED( seq )     (((seq)->flags & CV_SEQ_FLAG_CLOSED) != 0)
+;; (define CV_IS_SEQ_CONVEX( seq )     0
+;; (define CV_IS_SEQ_HOLE( seq )       (((seq)->flags & CV_SEQ_FLAG_HOLE) != 0)
+;; (define CV_IS_SEQ_SIMPLE( seq )     1
 
 
 

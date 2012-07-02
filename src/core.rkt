@@ -1,3 +1,4 @@
+
 ;; Author: Petr Samarin
 ;; Description: Porting highgui_c.h to Racket
 
@@ -154,7 +155,7 @@
 
   ;; Releases array data
   (define-opencv-core cvReleaseData
-    (_fun _pointer -> _void))
+    (_fun (_ptr i _pointer) -> _void))
 
   #| Attaches user data to the array header. The step is reffered to
   the pre-last dimension. That is, all the planes of the array
@@ -175,11 +176,13 @@
 
   ;; Returns width and height of array in elements
   (define-opencv-core cvGetSize
-    (_fun _pointer -> _void))
+    (_fun _pointer -> _CvSize))
 
   ;; Clears all the array elements (sets them to 0)
   (define-opencv-core cvSetZero
     (_fun _pointer -> _void))
+
+  (define cvZero cvSetZero)
 
   ;; Copies source array to destination array
   (define-opencv-core cvCopy
@@ -211,7 +214,112 @@
          (array-set! an-array i val))
     an-array)
 
+
+  #|**************************************************************************
+                      Dynamic data structures                                  
+  ****************************************************************************|#
+
+  ;; Calculates length of sequence slice (with support of negative indices).
+  (define-opencv-core cvSliceLength
+    (_fun _CvSlice _pointer -> _int))
+
+  #| Creates new memory storage.
+  block_size == 0 means that default,
+  somewhat optimal size, is used (currently, it is 64K) |#
+  (define-opencv-core cvCreateMemStorage
+    (_fun ((block-size 0)) :: (block-size : _int) -> (storage : _pointer)
+          -> (ptr-ref storage _CvMemStorage)))
+
+  ;; Creates a memory storage that will borrow memory blocks from parent storage
+  (define-opencv-core cvCreateChildMemStorage
+    (_fun _pointer -> _pointer))
+
+  #|Releases memory storage. All the children of a parent must be released before
+  the parent. A child storage returns all the blocks to parent when it is released |#
+  (define-opencv-core cvReleaseMemStorage
+    (_fun (_ptr i _pointer) -> _void))
+
+  #| Clears memory storage. This is the only way(!!!) (besides cvRestoreMemStoragePos)
+  to reuse memory allocated for the storage - cvClearSeq,cvClearSet ...
+  do not free any memory.
+  A child storage returns all the blocks to the parent when it is cleared |#
+  (define-opencv-core cvClearMemStorage
+    (_fun _pointer -> _void))
+
+  #| Remember a storage "free memory" position |#
+  (define-opencv-core cvSaveMemStoragePos
+    (_fun _pointer _pointer -> _void))
+
+  #| Restore a storage "free memory" position |#
+  (define-opencv-core cvRestoreMemStoragePos
+    (_fun _pointer _pointer -> _void))
+
+  ;; Allocates continuous buffer of the specified size in the storage */
+  (define-opencv-core cvMemStorageAlloc
+    (_fun _pointer _int -> _pointer))
+
+  ;; ;; Allocates string in memory storage */
+  ;; (define-opencv-core cvMemStorageAllocString
+  ;;   (_fun (storage ptr (len -1)) ::
+  ;;         [storage : _pointer]
+  ;;         [ptr : _pointer]
+  ;;         [len : _int]
+  ;;         -> _CvString))
+
+  ;; Creates new empty sequence that will reside in the specified storage */
+  (define-opencv-core cvCreateSeq
+    (_fun _int _int _int _pointer
+          -> (seq : _pointer)
+          -> (ptr-ref seq _CvSeq)))
+
+  #| Changes default size (granularity) of sequence blocks.
+  The default size is ~1Kbyte |#
+  (define-opencv-core cvSetSeqBlockSize
+    (_fun _pointer _int -> _void))
+
+
+  ;; Adds new element to the end of sequence. Returns pointer to the element */
+  (define-opencv-core cvSeqPush
+    (_fun (seq (element #f)) ::
+          [seq : _pointer]
+          [element : _pointer]
+          -> _pointer))
+
+  ;; Adds new element to the beginning of sequence. Returns pointer to it */
+  (define-opencv-core cvSeqPushFront
+    (_fun (seq (element #f)) ::
+          [seq : _pointer]
+          [element : _pointer]
+          -> _pointer))
+
+  ;; Removes the last element from sequence and optionally saves it */
+  (define-opencv-core cvSeqPop
+    (_fun (seq (element #f)) ::
+          [seq : _pointer]
+          [element : _pointer]
+          -> _void))
+
+
+  ;; Removes the first element from sequence and optioanally saves it */
+  (define-opencv-core cvSeqPopFront
+    (_fun (seq (element #f)) ::
+          [seq : _pointer]
+          [element : _pointer]
+          -> _void))
+
+  (define CV_FRONT 1)
+  (define CV_BACK 0)
+
+
+  #| Removes all the elements from the sequence. The freed memory
+   can be reused later only by the same sequence unless cvClearMemStorage
+  or cvRestoreMemStoragePos is called |#
+  (define-opencv-core cvClearSeq
+    (_fun _pointer -> _void))
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Drawing
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (define (CV_RGB r g b)
     (cvScalar b g r 0))
   (define CV_FILLED -1)
@@ -294,29 +402,18 @@
     (_fun _pointer _string _CvPoint _pointer _CvScalar
           -> _void))
 
-
-  #|**************************************************************************
-                      Dynamic data structures                                  
-  ****************************************************************************|#
-
-  ;; Calculates length of sequence slice (with support of negative indices).
-  (define-opencv-core cvSliceLength
-    (_fun _CvSlice _pointer -> _int))
-
-  #| Creates new memory storage.
-  block_size == 0 means that default,
-  somewhat optimal size, is used (currently, it is 64K) |#
-  (define-opencv-core cvCreateMemStorage
-    (_fun ((block-size 0)) :: (block-size : _int) -> _pointer))
-
-  ;; Creates a memory storage that will borrow memory blocks from parent storage
-  (define-opencv-core cvCreateChildMemStorage
-    (_fun _pointer -> _pointer))
-
-  #|Releases memory storage. All the children of a parent must be released before
-  the parent. A child storage returns all the blocks to parent when it is released |#
-  (define-opencv-core cvReleaseMemStorage
-    (_fun _pointer -> _void))
+  #| Draws contour outlines or filled interiors on the image |#
+  (define-opencv-core cvDrawContours
+    (_fun (img contour external-color hole-color max-level
+               (thickness 1) (line-type 8) (offset (cvPoint 0 0))) ::
+               [img : _pointer]
+               [contour : _pointer]
+               [external-color : _CvScalar]
+               [hole-color : _CvScalar]
+               [max-level : _int]
+               [thickness : _int]
+               [line-type : _int]
+               [offset : _CvPoint] -> _void))  
 
   #|************************ Adding own types **************************|#
   (define-opencv-core cvRegisterType

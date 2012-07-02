@@ -347,26 +347,47 @@
   ****************************************************** |#
 
   #| Retrieves outer and optionally inner boundaries of white (non-zero) connected
-  components in the black (zero) background |#
+  components in the black (zero) background |#  
   (define-opencv-imgproc cvFindContours
-    (_fun _pointer _pointer _pointer _int _int _int _CvPoint -> _int))
-  
+    (_fun (image storage first-contour (header-size (ctype-sizeof _CvContour))
+                 (mode CV_RETR_LIST) (method CV_CHAIN_APPROX_SIMPLE)
+                 (offset (cvPoint 0 0))) ::
+                 [image : _pointer]
+                 [storage : _pointer]
+                 [first-contour : _pointer]
+                 [header-size : _int]
+                 [mode : _int]
+                 [method : _int]
+                 [offset : _CvPoint]
+                 -> _int))
+
   #| Initalizes contour retrieving process.
   Calls cvStartFindContours.
   Calls cvFindNextContour until null pointer is returned
   or some other condition becomes true.
   Calls cvEndFindContours at the end. |#
-  ;; (define-opencv-imgproc cvStartFindContours
-  ;;   (_fun _pointer _pointer _int _int _int _CvPoint -> _CvContourScanner))
+  (define-opencv-imgproc cvStartFindContours
+    (_fun (image storage
+                 (header-size (ctype-sizeof _CvContour))
+                 (mode CV_RETR_LIST)
+                 (method CV_CHAIN_APPROX_SIMPLE)
+                 (offset (cvPoint 0 0))) ::
+          [image : _pointer]
+          [storage : _pointer]
+          [header-size : _int]
+          [mode : _int]
+          [method : _int]
+          [offset : _CvPoint]
+          -> _CvContourScanner))
 
   #| Retrieves next contour |#
-  ;; (define-opencv-imgproc cvFindNextContour
-  ;;   (_fun _CvScanner -> _pointer))
+   (define-opencv-imgproc cvFindNextContour
+     (_fun _CvContourScanner -> _pointer))
 
   #| Substitutes the last retrieved contour with the new one
   (if the substitutor is null, the last retrieved contour is removed from the tree) |#
-  ;; (define-opencv-imgproc cvSubstituteContour
-  ;;   (_fun _CvScanner _pointer -> _void))
+   (define-opencv-imgproc cvSubstituteContour
+     (_fun _CvContourScanner _pointer -> _void))
 
   #| Releases contour scanner and returns pointer to the first outer contour |#
   (define-opencv-imgproc cvEndFindContours
@@ -386,18 +407,6 @@
   (define-opencv-imgproc cvReadChainPoint
     (_fun  _pointer -> _CvPoint))
 
-  #|*********************************************************
-  *                              Planar subdivisions        *
-  \*********************************************************|#
-  #| Initializes Delaunay triangulation |#
-  ;; Not available in version 2.4.0
-  ;; (define-opencv-imgproc cvInitSubdivDelaunay2D
-  ;;   (_fun  _pointer _CvRect -> _void))
-
-  #| Creates new subdivision |#
-  ;; Not available in version 2.4.0
-  ;; (define-opencv-imgproc cvCreateSubdiv2D
-  ;;   (_fun _int  _int _int _int _pointer -> _pointer))
 
   #|************************ high-level subdivision functions ************|#
 
