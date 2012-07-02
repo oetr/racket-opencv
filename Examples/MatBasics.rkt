@@ -53,10 +53,10 @@
 (cvAdd mat3 mat3 mat4)
 
 ;; get data array from the matrix
-(define data (cvMatData-ptr mat4 _float))
+(define data1 (cvMatData-ptr mat4 _float))
 
 ;; access some of the elements
-(for* ([row (array-length data)]
-       [column (array-length (array-ref data 0))])
+(for* ([row (array-length data1)]
+       [column (array-length (array-ref data1 0))])
       (printf "~a~n"
-              (array-ref data row column)))
+              (array-ref data1 row column)))

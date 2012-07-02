@@ -87,9 +87,19 @@
 
   (define CvTrackbarCallback (_fun _int -> _void))
 
+;;   #| create trackbar and display it on top of given window, set callback |#
+;; CVAPI(int) cvCreateTrackbar( const char* trackbar_name, const char* window_name,
+;;                              int* value, int count, CvTrackbarCallback on_change CV_DEFAULT(NULL));
   ;; create trackbar and display it on top of given window, set callback
   (define-opencv-highgui cvCreateTrackbar
-    (_fun _string _string _pointer _int CvTrackbarCallback -> _int))
+    (_fun (trackbar-name window-name value count (on-change #f)) ::
+          [trackbar-name : _string]
+          [window-name : _string]
+          [value : (_ptr o _int)]
+          [count : _int]
+          [on-change : (_fun _int -> _void)]
+          -> _int))
+    ;;(_fun _string _string _pointer _int CvTrackbarCallback -> _int))
 
   (define CvTrackbarCallback2 (_fun _int _pointer -> _void))
 

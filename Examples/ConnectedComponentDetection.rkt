@@ -104,31 +104,44 @@
             (define color (CV_RGB (random+ 155 100)
                                   (random+ 155 100)
                                   (random+ 155 100)))
-            (cvDrawContours img a-sequence  color color -1 5)
+            (cvDrawContours img a-sequence  color color -1 1)
             (cvClearSeq a-sequence))
           lof-sequences))
 
 (define min-threshold 50.0)
 
+;; Add a trackbar
+(define a (malloc 'atomic _int))
+(ptr-set! a _int (inexact->exact (floor min-threshold)))
+(define (on-trackbar n)
+  (set! min-threshold (exact->inexact n))
+  ;; slowing down callback function makes the program less likely to crash
+  (sleep 0.1))
+
+(cvShowImage "captured" captured-image)
+(cvCreateTrackbar "Corner Threshold" "captured" a 255 on-trackbar)
+
 (let loop ()
   (set! captured-image (cvQueryFrame capture))
   (cvConvertImage captured-image img IPL_DEPTH_8U)
+  (cvShowImage "bw" img)
   (cvThreshold img img min-threshold 255.0 CV_THRESH_BINARY)
-  (cvShowImage "Binary-image" img)
+  (cvShowImage "Binary-image" img)  
   ;; allocate memory
   (define storage (cvCreateMemStorage 0))
-  (define contour (malloc (_cpointer _CvSeq) 'atomic))  
+  (define contour (malloc (_cpointer _CvSeq) 'atomic))
   (cvFindContours img storage contour 128 CV_RETR_EXTERNAL
-                ;;CV_RETR_CCOMP CV_RETR_TREE
-                  CV_CHAIN_APPROX_NONE)
-  (define seq (ptr-ref (ptr-ref contour _pointer) _CvSeq))
-  (define sequences (sequence-chain->list seq))
-  (draw-contours! sequences captured-image)
-  (cvShowImage "captured" captured-image)
+                  CV_RETR_TREE;; CV_RETR_TREE
+                  ;;CV_CHAIN_APPROX_NONE)
+                  )
+  (when (ptr-ref contour _pointer)
+    (define seq (ptr-ref (ptr-ref contour _pointer) _CvSeq))
+    (define sequences (sequence-chain->list seq))
+    (draw-contours! sequences captured-image)
+    (cvShowImage "captured" captured-image))
   (cvReleaseMemStorage storage)
   (unless (>= (cvWaitKey 10) 0)
     (loop)))
 
 ;;(cvShowImage "Destination" dst)
-
 ;;(cvSaveImage (string->path (string-append img-dir "new-image.jpg") ) dst)
