@@ -12,10 +12,10 @@
     (ffi-lib "/opt/local/lib/libopencv_highgui"))
   
   ;; Ported OpenCV requirements
-  (require "types.rkt")
-  (require "core.rkt")
-  ;; Unit Testing
-  (require rackunit)
+  (require "types.rkt"
+           "core.rkt")
+
+    
 
   ;; this function is used to set some external parameters in case of X Window
   (define-opencv-highgui cvInitSystem

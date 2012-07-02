@@ -7,12 +7,11 @@
   ;; Racket Foreign interface
   (require ffi/unsafe
            ffi/unsafe/define
-           ffi/vector)
+           ffi/vector
+           "types.rkt")
 
   (define-ffi-definer define-opencv-core
     (ffi-lib "/opt/local/lib/libopencv_core"))
-
-  (require "types.rkt")
 
 ;;; FFI Definers
   #|***************************************************************************************\
@@ -30,37 +29,10 @@
                                               -> (ptr-ref ipl-image _IplImage)))
 
   #| Creates IPL image (header and data) |#
-  ;; (define-opencv-core cvCreateImage (_fun _CvSize _int _int
-  ;;                                         -> (ipl-image : (_ptr i _IplImage))
-  ;;                                         -> (ptr-ref ipl-image _IplImage)))
-  
-   ;; (define-opencv-core cvCreateImage
-   ;;   (_fun _CvSize _int _int ->
-   ;;         -> (img : _pointer)
-   ;;         -> (ptr-ref img _IplImage)))
-
-  ;; (define-opencv-core cvCreateImage
-  ;;   (_cprocedure (list _CvSize _int _int) _IplImage
-  ;;                (lambda ()
-   (define-opencv-core cvCreateImage
-     (_cprocedure (list _CvSize _int _int) _pointer
-                  #:atomic? #t
-                  #:wrapper
-                  (lambda (ffi-obj)
-                    (lambda (size depth channels)
-                      (ptr-ref (ffi-obj size depth channels) _IplImage)))))
-
-           ;; -> (img : _pointer = (malloc 'atomic _IplImage))
-           ;; -> (ptr-ref img _IplImage)))
-   
-  ;; (define (create-image size depth channels)
-  ;;   (define img (malloc 'atomic _IplImage))
-  ;;   (ptr-ref(cvCreateImage size depth channels)
-    
-    
-  ;;   ()
-  ;;                                         -> (ipl-image : (_ptr i _IplImage))
-  ;;                                         -> (ptr-ref ipl-image _IplImage)))
+  (define-opencv-core cvCreateImage
+    (_fun _CvSize _int _int
+          -> (img : _pointer)
+          -> (ptr-ref img _IplImage)))
 
   #| Releases (i.e. deallocates) IPL image header |#
   (define-opencv-core cvReleaseImageHeader

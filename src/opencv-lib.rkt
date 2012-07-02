@@ -3,6 +3,8 @@ opencv-lib.rkt: Finds the opencv library files
 Copyright (C) Peter Samarin
 |#
 
+;; TODO: make this library define ffi-objects based on system type
+
 (module opencv-lib racket
   ;; eval the require in order to provide a
   ;; "define-ffi-definer" and "ffi-lib"  
