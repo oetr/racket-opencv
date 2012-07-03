@@ -103,21 +103,22 @@
   (define (doPyrDown an-image (a-filter CV_GAUSSIAN_5x5))
     ;; get image parameters dependent on image type
     (define width 0)
-    (define height 0)
+    (define height 0)    
     (cond
      [(IplImage? an-image)
       (set! width (IplImage-width an-image))
       (set! height (IplImage-height an-image))]
      [(CvMat? an-image)
       (set! width (CvMat-cols an-image))
-      (set! height (CvMat-rows an-image))])   
+      (set! height (CvMat-rows an-image))])
     ;; make sure that the image is divisible by 2
     (unless (and (zero? (modulo width 2))
                  (zero? (modulo height 2)))      
-      (raise-user-error
+      (error
        'doPyrDown
        "image dimensions must be divisible by 2, but got width=~a, height=~a~n"
        width height))
+    ;; create an image of the same type
     (cond
      [(IplImage? an-image)
       (define out-image (cvCreateImage (make-CvSize (/ width 2)
@@ -134,11 +135,9 @@
       out-image]))
 
   (define (doPyrDown! an-image (a-filter CV_GAUSSIAN_5x5))
-    (define pyred-down-image #f)
-    (set! pyred-down-image (doPyrDown an-image a-filter))
-    (cond
-     [(IplImage? an-image) (cvReleaseImage an-image)]
-     [(CvMat? an-image) (cvReleaseMat an-image)])
+    (define pyred-down-image (doPyrDown an-image a-filter))
+    (cond [(IplImage? an-image) (cvReleaseImage an-image)]
+          [(CvMat? an-image) (cvReleaseMat an-image)])
     pyred-down-image)
 
   ;; Up-samples image and smoothes the result with gaussian kernel.

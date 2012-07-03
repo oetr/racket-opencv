@@ -166,6 +166,22 @@
           (mask : _pointer)
           -> _void))
 
+  (define (copy-image img (mask #f))
+    (cond [(IplImage? img)
+           (define out (cvCreateImage (make-CvSize (IplImage-width img)
+                                                   (IplImage-height img))
+                                      (IplImage-depth img)
+                                      (IplImage-nChannels img)))
+           (cvCopy img out mask)
+           out]
+          [(CvMat? img)
+           (define out (cvMat (IplImage-width img)
+                              (IplImage-height img)
+                              (IplImage-depth img)
+                              (IplImage-nChannels img)))
+           (cvCopy img out mask)
+           out]))
+
   ;; dst(mask) = src1(mask) + src2(mask)
   (define-opencv-core cvAdd
     (_fun (src1 src2 dst (mask #f)) ::
