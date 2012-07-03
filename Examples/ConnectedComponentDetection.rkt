@@ -12,13 +12,7 @@
          "../src/imgproc.rkt"
          ffi/unsafe)
 
-;; (define img-dir "/Users/petr/TestImages/CornerDetection/")
-;; (define img-name "DSC06183.jpg")
-;; (define dst (cvLoadImage (string-append img-dir img-name)))
-;; (define src (cvCreateImage (cvGetSize dst) 8 1))
-;; (cvConvertImage dst src IPL_DEPTH_8U)
-
-;; (define storage (cvCreateMemStorage 0))
+;;(define storage (cvCreateMemStorage 0))
 ;; ;;(define contour (malloc _CvSeq 'atomic))
 ;; (define contour (malloc (_cpointer _CvSeq) 'atomic))
 
@@ -61,23 +55,21 @@
         (cons element empty)
         (cons element (loop (- count 1))))))
 
-(define (block-chain->list a-block a-type)
-  (define next-ptr (CvSeqBlock-next a-block))
-  (if (and next-ptr (not (ptr-equal? a-block next-ptr)))
-      (let ([next-block (ptr-ref next-ptr _CvSeqBlock)])
-        (cons (block->list a-block a-type)
-              (block-chain->list next-block a-type)))
-      (list (block->list a-block a-type))))
+(define (sequence->list a-sequence a-type)
+  (define (block-chain->list a-block a-type count)
+    (define next-ptr (CvSeqBlock-next a-block))
+    (if (and next-ptr (> count 0))
+        (let ([next-block (ptr-ref next-ptr _CvSeqBlock)])
+          (cons (block->list a-block a-type)
+                (block-chain->list next-block a-type (- count (CvSeqBlock-count next-block)))))
+        '()))
+  (block-chain->list (seq-first a-sequence) _CvPoint (CvSeq-total a-sequence)))
 
-;; (define points (map (lambda (a-sequence)
-;;                       (map (lambda (a-list)
-;;                              (map (lambda (a-point)
-;;                                     (list (CvPoint-x a-point) (CvPoint-y a-point)))
-;;                                   a-list))
-;;                            (block-chain->list (seq-first a-sequence)
-;;                                               _CvPoint)))
-;;                     sequences))
-;;                     (take sequences 15)))
+(define points
+  (map (lambda (a-sequence)
+         (sequence->list a-sequence _CvPoint))
+       sequences))
+
 
 (define capture (cvCaptureFromCAM 0))
 (cvSetCaptureProperty capture CV_CAP_PROP_FRAME_WIDTH 640.0)
@@ -98,12 +90,12 @@
 (define (random+ limit addition)
   (+ (random limit) addition))
 
-(define (draw-contours! lof-sequences img)
+(define (draw-contours! lof-sequences img thickness)
   (andmap (lambda (a-sequence)
             (define color (CV_RGB (random+ 155 100)
                                   (random+ 155 100)
                                   (random+ 155 100)))
-            (cvDrawContours img a-sequence  color color -1 1)
+            (cvDrawContours img a-sequence  color color -1 thickness)
             (cvClearSeq a-sequence))
           lof-sequences))
 
@@ -142,5 +134,46 @@
   (unless (>= (cvWaitKey 10) 0)
     (loop)))
 
-;;(cvShowImage "Destination" dst)
-;;(cvSaveImage (string->path (string-append img-dir "new-image.jpg") ) dst)
+(define img-dir "/Users/petr/TestImages/CornerDetection/")
+(define img-name "test-board.png")
+(define src (cvLoadImage (string-append img-dir img-name)))
+(cvShowImage "Binary Image" src)
+(define copy #f)
+(define dst #f)
+(define binary-image #f)
+
+;; Add a trackbar
+(define min-threshold 50.0)
+(define a (malloc 'atomic _int))
+(ptr-set! a _int (inexact->exact (floor min-threshold)))
+(define (on-trackbar n)
+  (set! min-threshold (exact->inexact n))
+  (update-ccl)
+  (sleep 0.1))
+
+(define (update-ccl)
+  (cvReleaseImage dst)
+  (cvReleaseImage copy)
+  (set! copy (copy-image src))
+  (set! dst (cvCreateImage (cvGetSize copy) 8 1))
+  (cvConvertImage copy dst IPL_DEPTH_8U)
+  (define storage (cvCreateMemStorage 0))
+  (define contour (malloc (_cpointer _CvSeq) 'atomic))
+  (cvThreshold dst dst min-threshold 255.0 CV_THRESH_BINARY)
+  (set! binary-image (copy-image dst))
+  (cvShowImage "Binary Image" dst)
+  (cvFindContours dst storage contour 128 CV_RETR_EXTERNAL CV_CHAIN_APPROX_NONE)
+  (when (ptr-ref contour _pointer)
+    (define seq (ptr-ref (ptr-ref contour _pointer) _CvSeq))
+    (define sequences (sequence-chain->list seq))
+    (draw-contours! sequences copy 3))
+  (cvShowImage "CCL Results" copy)
+  ;; release memory  
+  (cvReleaseMemStorage storage))
+
+(cvCreateTrackbar "Corner Threshold" "Binary Image" a 255 on-trackbar)
+
+(cvSaveImage (string->path (string-append img-dir "new-image.jpg")) copy)
+
+(cvDestroyAllWindows)
+(cvDestroyWindow "Main Window")
