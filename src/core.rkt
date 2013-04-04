@@ -385,6 +385,35 @@
           (line-type : _int)
           (shift : _int) -> _void))
 
+  #| Draws a circle with specified center and radius.
+  Thickness works in the same way as with cvRectangle |#
+  (define-opencv-core cvCircle
+    (_fun (img center radius color (thickness 1) (line-type 8) (shift 0)) ::
+          (img : _pointer)
+          (center : _CvPoint)
+          (radius : _int)
+          (color : _CvScalar)
+          (thickness : _int)
+          (line-type : _int)
+          (shift : _int) -> _void))
+
+  #| Draws ellipse outline, filled ellipse, elliptic arc or filled elliptic sector,
+  depending on <thickness>, <start_angle> and <end_angle> parameters. The resultant
+  figure is rotated by <angle>. All the angles are in degrees |#
+  (define-opencv-core cvEllipse
+    (_fun (img center axes angle start-angle end-angle
+               color (thickness 1) (line-type 8) (shift 0)) ::
+          (img : _pointer)
+          (center : _CvPoint)
+          (axes : _CvSize)
+          (angle : _double)
+          (start-angle : _double)
+          (end-angle : _double)
+          (color : _CvScalar)
+          (thickness : _int)
+          (line-type : _int)
+          (shift : _int) -> _void))
+
   #| Draws 4-connected, 8-connected or antialiased line segment connecting two points|#
   (define-opencv-core cvLine
     (_fun (img pt1 pt2 color (thickness 1) (line-type 8) (shift 0)) ::

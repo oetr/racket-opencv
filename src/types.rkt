@@ -343,6 +343,11 @@
     (make-CvSize (CvMat-rows a-mat)
                  (CvMat-cols a-mat)))
 
+  (define (cvMat-depth a-mat)
+    (/ (CvMat-step a-mat)
+       (CvMat-cols a-mat)
+       1.0))
+
   #|/**********************************************************************
   *                       Multi-dimensional dense array (CvMatND)         *
   \**********************************************************************|#

@@ -755,8 +755,20 @@
   #| Finds a sparse set of points within the selected region
   that seem to be easy to track |#
   (define-opencv-imgproc cvGoodFeaturesToTrack
-    (_fun _pointer _pointer _pointer _pointer _pointer
-          _double _double _pointer _int _int _double -> _void))
+    (_fun (image eig-image temp-image corners corner-count quality-level min-distance
+                 (mask #f) (block-size 3) (use-harris 0) (k 0.04)) ::
+                 (image         : (_ptr i _CvMat))
+                 (eig-image     : _pointer)
+                 (temp-image    : _pointer)
+                 (corners       : _pointer)
+                 (corner-count  : _pointer)
+                 (quality-level : _double)
+                 (min-distance  : _double)
+                 (mask          : _pointer)
+                 (block-size    : _int)
+                 (use-harris    : _int)
+                 (k             : _double)
+                 -> _void))
 
   #| Finds lines on binary image using one of several methods.
   line_storage is either memory storage or 1 x <max number of lines> CvMat, its
@@ -841,5 +853,4 @@
   ;; Not available in version 2.4.0
   ;; (define-opencv-imgproc cvLSHQuery
   ;;   (_fun _pointer _pointer _pointer _pointer _int  _int -> _void))
-  
   )
