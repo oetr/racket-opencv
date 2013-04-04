@@ -3,7 +3,9 @@
 
 ;; Author: Petr Samarin
 ;; Date: 2013
-;; Description: given 4 points, rectify an image
+;; Description: subpixel corner detection
+;; converted from C++ code in
+;; http://docs.opencv.org/doc/tutorials/features2d/trackingmotion/corner_subpixeles/corner_subpixeles.html
 
 ;;; Includes
 (require "../src/core.rkt"
@@ -18,7 +20,7 @@
 
 (cond [(zero? (vector-length arguments))
        (printf "taking the default image~n")
-       (set! image-name "./images/ArucoRectification.png")
+       (set! image-name "images/ArucoRectification.png")
        (set! output-image "images/Corners.png")]
       [(= (vector-length arguments) 1)
        (set! image-name (vector-ref arguments 0))
@@ -27,14 +29,9 @@
        (set! image-name (vector-ref arguments 0))
        (set! output-image (vector-ref arguments 1))])
 
-(define source-window "Source Image")
-(define corners-window "Corners")
 (define src (imread image-name))
 (define src-gray  (cvCreateMat (CvMat-rows src) (CvMat-cols src) CV_8UC1))
 (cvCvtColor src src-gray CV_BGR2GRAY)
-
-(imshow source-window src)
-(imshow corners-window src-gray)
 
 (define maxCorners 500)
 (define maxTrackbar 25)
@@ -78,9 +75,6 @@
             (cvPoint (inexact->exact (round (CvPoint2D32f-x corner)))
                      (inexact->exact (round (CvPoint2D32f-y corner))))
             radius (cvScalar 0 0 255) -1 8 0))
-
-(imshow corners-window copy-corners )
 (cvSaveImage output-image copy-corners)
-
-(define key (cvWaitKey 0))
 (cvDestroyAllWindows)
+
