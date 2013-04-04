@@ -23,14 +23,9 @@
     (exit))
   (set! image-name (vector-ref arguments 0)))
 
-;;(define image-name "images/Lena.jpg")
-
 (define source-window "Source Image")
 (define warp-window "Warp")
 (define warp-rotate-window "Warp + Rotate")
-
-(define rot-mat (cvCreateMat 2 3 CV_32FC1))
-(define warp-mat (cvCreateMat 2 3 CV_32FC1))
 
 (define src (imread image-name))
 (define warp-dst (cvCreateMat (CvMat-rows src) (CvMat-cols src) (CvMat-type src)))
@@ -38,33 +33,20 @@
                                      (CvMat-cols src)
                                      (CvMat-type src)))
 
-;; (define srcTri
-;;   (c-array _CvPoint2D32f
-;;            (make-CvPoint2D32f 0.0                      0.0)
-;;            (make-CvPoint2D32f (- (CvMat-cols src) 1.0) 0.0)
-;;            (make-CvPoint2D32f 0.0                      (- (CvMat-rows src) 1.0))))
+ (define srcTri
+   (c-array _CvPoint2D32f
+            (make-CvPoint2D32f 0.0                      0.0)
+            (make-CvPoint2D32f (- (CvMat-cols src) 1.0) 0.0)
+            (make-CvPoint2D32f 0.0                      (- (CvMat-rows src) 1.0))))
 
-;; (define dstTri
-;;   (c-array _CvPoint2D32f
-;;            (make-CvPoint2D32f (* (CvMat-cols src) 0.0)  (* (CvMat-rows src) 0.33))
-;;            (make-CvPoint2D32f (* (CvMat-cols src) 0.85) (* (CvMat-rows src) 0.25))
-;;            (make-CvPoint2D32f (* (CvMat-cols src) 0.15) (* (CvMat-rows src) 0.7))))
-
-(define srcTri (malloc 'atomic _CvPoint2D32f 3))
-(ptr-set! srcTri _CvPoint2D32f 0 (make-CvPoint2D32f 0.0                      0.0))
-(ptr-set! srcTri _CvPoint2D32f 1 (make-CvPoint2D32f (- (CvMat-cols src) 1.0) 0.0))
-(ptr-set! srcTri _CvPoint2D32f 2 (make-CvPoint2D32f 0.0 (- (CvMat-rows src) 1.0)))
-
-(define dstTri (malloc 'atomic _CvPoint2D32f 3))
-(ptr-set! dstTri _CvPoint2D32f 0
-          (make-CvPoint2D32f (* (CvMat-cols src) 0.0)  (* (CvMat-rows src) 0.33)))
-(ptr-set! dstTri _CvPoint2D32f 1
-          (make-CvPoint2D32f (* (CvMat-cols src) 0.85) (* (CvMat-rows src) 0.25)))
-(ptr-set! dstTri _CvPoint2D32f 2
-          (make-CvPoint2D32f (* (CvMat-cols src) 0.15) (* (CvMat-rows src) 0.7)))
+ (define dstTri
+   (c-array _CvPoint2D32f
+            (make-CvPoint2D32f (* (CvMat-cols src) 0.0)  (* (CvMat-rows src) 0.33))
+            (make-CvPoint2D32f (* (CvMat-cols src) 0.85) (* (CvMat-rows src) 0.25))
+            (make-CvPoint2D32f (* (CvMat-cols src) 0.15) (* (CvMat-rows src) 0.7))))
 
 ;; Get the Affine Transform
-(cvGetAffineTransform srcTri dstTri warp-mat)
+(define warp-mat (cvGetAffineTransform (array-ptr srcTri) (array-ptr dstTri)))
 
 ;; Apply the Affine Transform just found to the src image
 (cvWarpAffine src warp-dst warp-mat)
@@ -84,11 +66,8 @@
 (cvWarpAffine warp-dst warp-rotate-dst rot-mat)
 
 ;; Show what you got
-(cvNamedWindow source-window CV_WINDOW_AUTOSIZE)
 (imshow source-window src)
-
-(cvNamedWindow warp-window CV_WINDOW_AUTOSIZE)
 (imshow warp-window warp-dst)
-
-(cvNamedWindow warp-rotate-window CV_WINDOW_AUTOSIZE)
 (imshow warp-rotate-window warp-rotate-dst)
+
+(cvWaitKey 0)

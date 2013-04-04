@@ -224,19 +224,20 @@
 
   #| Computes affine transform matrix for mapping src[i] to dst[i] (i=0,1,2) |#
   (define-opencv-imgproc cvGetAffineTransform
-    (_fun (src dst mat) ::
+    (_fun (src dst (map-matrix (cvCreateMat 2 3 CV_32FC1))) ::
           (src : _pointer)
           (dst : _pointer)
-          (mat : _pointer)
-          -> _void))
+          (map-matrix : _pointer)
+          -> (result : _pointer)
+          -> (ptr-ref result _CvMat)))
 
   #| Computes rotation_matrix matrix |#
   (define-opencv-imgproc cv2DRotationMatrix
-    (_fun (center angle scale) ::
+    (_fun (center angle scale (map-matrix (cvCreateMat 2 3 CV_32FC1))) ::
           (center : _CvPoint2D32f)
           (angle : _double)
           (scale : _double)
-          ((cvCreateMat 2 3 CV_32FC1) : _pointer)
+          (map-matrix : _pointer)
           -> (result : _pointer)
           -> (ptr-ref result _CvMat)))
           

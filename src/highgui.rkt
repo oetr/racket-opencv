@@ -66,7 +66,7 @@
 
   ;; resize/move window
   (define-opencv-highgui cvResizeWindow
-    (_fun _string _int _int -> _void)) 
+    (_fun _string _int _int -> _void))
   (define-opencv-highgui cvMoveWindow
     (_fun _string _int _int -> _void))
 
