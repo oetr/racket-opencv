@@ -80,7 +80,7 @@
             -1 8 0))
 
 (imshow corners-window copy-corners )
-(cvSaveImage "Corners.png" copy-corners)
+(cvSaveImage "images/Corners.png" copy-corners)
 
 (define key (cvWaitKey 0))
 (cvDestroyAllWindows)
