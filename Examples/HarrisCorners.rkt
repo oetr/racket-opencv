@@ -14,16 +14,21 @@
 
 (define arguments (current-command-line-arguments))
 (define image-name #f)
+(define output-image #f)
 
-(if (zero? (vector-length arguments))
-    (begin
-      (printf "taking the default image~n")
-      (set! image-name "./images/ArucoRectification.png"))
-    (set! image-name (vector-ref arguments 0)))
+(cond [(zero? (vector-length arguments))
+       (printf "taking the default image~n")
+       (set! image-name "./images/ArucoRectification.png")
+       (set! output-image "images/Corners.png")]
+      [(= (vector-length arguments) 1)
+       (set! image-name (vector-ref arguments 0))
+       (set! output-image "images/Corners.png")]
+      [else
+       (set! image-name (vector-ref arguments 0))
+       (set! output-image (vector-ref arguments 1))])
 
 (define source-window "Source Image")
 (define corners-window "Corners")
-(define refined-corners-window "Refined Corners")
 (define src (imread image-name))
 (define src-gray  (cvCreateMat (CvMat-rows src) (CvMat-cols src) CV_8UC1))
 (cvCvtColor src src-gray CV_BGR2GRAY)
@@ -47,7 +52,6 @@
 ;; Copy the source image
 (define copy-corners (cvCloneMat src))
 
-
 (cvGoodFeaturesToTrack src-gray #f #f (array-ptr corners)
                        corner-count qualityLevel minDistance #f
                        blockSize useHarrisDetector k)
@@ -59,8 +63,8 @@
                                       40 0.001))
 
 ;; Calculate the refined corner locations
-(cvFindCornerSubPix src-gray (array-ptr corners)
-                    (ptr-ref corner-count _int) winSize zeroZone criteria)
+(cvFindCornerSubPix src-gray (array-ptr corners) (ptr-ref corner-count _int)
+                    winSize zeroZone criteria)
 
 (define radius 1)
 ;; Visualize
@@ -69,18 +73,14 @@
   (cvCircle copy-corners
             (cvPoint (inexact->exact (round (CvPoint2D32f-x corner)))
                      (inexact->exact (round (CvPoint2D32f-y corner))))
-            5
-            (cvScalar 255 120 20)
-            0 8 0)
+            5 (cvScalar 255 120 20) 0 8 0)
   (cvCircle copy-corners
             (cvPoint (inexact->exact (round (CvPoint2D32f-x corner)))
                      (inexact->exact (round (CvPoint2D32f-y corner))))
-            radius
-            (cvScalar 0 0 255)
-            -1 8 0))
+            radius (cvScalar 0 0 255) -1 8 0))
 
 (imshow corners-window copy-corners )
-(cvSaveImage "images/Corners.png" copy-corners)
+(cvSaveImage output-image copy-corners)
 
 (define key (cvWaitKey 0))
 (cvDestroyAllWindows)
