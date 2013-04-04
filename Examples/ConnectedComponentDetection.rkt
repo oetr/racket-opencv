@@ -16,27 +16,27 @@
 ;; ;;(define contour (malloc _CvSeq 'atomic))
 ;; (define contour (malloc (_cpointer _CvSeq) 'atomic))
 
-(define (sequence->list a-seq a-type)
-  (define (retrieve-block-objects a-block count)
-    (define element (ptr-ref (CvSeqBlock-data a-block) a-type count))
-    ;;(printf "~a~n" count)
-    (if (zero? count)
-        (cons element empty)
-        (cons element (retrieve-block-objects a-block (- count 1)))))
-  (define total (CvSeq-total a-seq))
-  (printf "total: ~a" total)
-  (define (traverse-sequence-aux total a-block)
-    (define next (seqBlock-next a-block))
-    (define start-index (CvSeqBlock-start_index a-block))
-    (define count (CvSeqBlock-count a-block))
-    (define block-elements (retrieve-block-objects a-block count))
-    (if (and next (not (zero? total)))
-        (cons block-elements 
-              (traverse-sequence-aux (- total 1) next))
-        (cons block-elements empty)))
-  (define first-block (seq-first a-seq))
-  (when first-block
-    (traverse-sequence-aux total first-block)))
+;; (define (sequence->list a-seq a-type)
+;;   (define (retrieve-block-objects a-block count)
+;;     (define element (ptr-ref (CvSeqBlock-data a-block) a-type count))
+;;     ;;(printf "~a~n" count)
+;;     (if (zero? count)
+;;         (cons element empty)
+;;         (cons element (retrieve-block-objects a-block (- count 1)))))
+;;   (define total (CvSeq-total a-seq))
+;;   (printf "total: ~a" total)
+;;   (define (traverse-sequence-aux total a-block)
+;;     (define next (seqBlock-next a-block))
+;;     (define start-index (CvSeqBlock-start_index a-block))
+;;     (define count (CvSeqBlock-count a-block))
+;;     (define block-elements (retrieve-block-objects a-block count))
+;;     (if (and next (not (zero? total)))
+;;         (cons block-elements 
+;;               (traverse-sequence-aux (- total 1) next))
+;;         (cons block-elements empty)))
+;;   (define first-block (seq-first a-seq))
+;;   (when first-block
+;;     (traverse-sequence-aux total first-block)))
 
 (define (sequence-chain->list a-seq)
   (define next-ptr (CvSeq-h_next a-seq))  
@@ -65,10 +65,10 @@
         '()))
   (block-chain->list (seq-first a-sequence) _CvPoint (CvSeq-total a-sequence)))
 
-(define points
-  (map (lambda (a-sequence)
-         (sequence->list a-sequence _CvPoint))
-       sequences))
+;; (define points
+;;   (map (lambda (a-sequence)
+;;          (sequence->list a-sequence _CvPoint))
+;;        sequences))
 
 
 (define capture (cvCaptureFromCAM 0))
@@ -105,9 +105,11 @@
 (define a (malloc 'atomic _int))
 (ptr-set! a _int (inexact->exact (floor min-threshold)))
 (define (on-trackbar n)
+  (sleep 0.5)
   (set! min-threshold (exact->inexact n))
   ;; slowing down callback function makes the program less likely to crash
-  (sleep 0.1))
+  )
+
 
 (cvShowImage "captured" captured-image)
 (cvCreateTrackbar "Corner Threshold" "captured" a 255 on-trackbar)
@@ -128,7 +130,7 @@
   (when (ptr-ref contour _pointer)
     (define seq (ptr-ref (ptr-ref contour _pointer) _CvSeq))
     (define sequences (sequence-chain->list seq))
-    (draw-contours! sequences captured-image))
+    (draw-contours! sequences captured-image 3))
   (cvShowImage "captured" captured-image)
   (cvReleaseMemStorage storage)
   (unless (>= (cvWaitKey 10) 0)

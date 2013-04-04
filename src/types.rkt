@@ -403,19 +403,27 @@
     ([x _float]
      [y _float]))
 
+  (define cvPoint2f make-CvPoint2D32f)
+
   (define-cstruct _CvPoint3D32f
     ([x _float]
      [y _float]
      [z _float]))
+
+  (define cvPoint3f make-CvPoint3D32f)
   
   (define-cstruct _CvPoint2D64f
     ([x _double]
      [y _double]))
 
+  (define cvPoint2d make-CvPoint2D64f)
+
   (define-cstruct _CvPoint3D64f
     ([x _double]
      [y _double]
      [z _double]))
+
+  (define cvPoint3d make-CvPoint3D64f)
 
   #|************************** CvSize's & CvBox *********************|#
   (define-cstruct _CvSize

@@ -166,10 +166,10 @@ void detect_corners (IplImage* src, IplImage* dst, uchar threshold)
 			 threshold);
 	    } else 
 		score = 0;
-	    int s = 0;
+	    int s = 2;
 	    if ((score > 0) || (score < 0))
 		cvRectangle (dst, cvPoint(x-s, y-s), cvPoint(x+s, y+s), 
-			     CV_RGB(0, 0, 255), 1, 8, 0);
+			     CV_RGB(200, 100, 100), 2, 8, 0);
 	    }
 }
 
