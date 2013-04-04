@@ -244,11 +244,23 @@
 
   #| Warps image with perspective (projective) transform |#
   (define-opencv-imgproc cvWarpPerspective
-    (_fun _pointer _pointer _pointer _int _CvScalar -> _void))
+    (_fun (src dst map-matrix
+               (flags (+ CV_INTER_LINEAR CV_WARP_FILL_OUTLIERS))
+               (fillval (cvScalarAll 0))) ::
+               (src : _pointer)
+               (dst : _pointer)
+               (map-matrix : _pointer)
+               (flags : _int)
+               (fillval : _CvScalar)
+               -> _void))
 
   #| Computes perspective transform matrix for mapping src[i] to dst[i] (i=0,1,2,3) |#
   (define-opencv-imgproc cvGetPerspectiveTransform
-    (_fun _pointer _pointer _pointer -> _pointer))
+    (_fun (src dst (map-matrix (cvCreateMat 3 3 CV_32FC1))) ::
+          (src : _pointer)
+          (dst : _pointer)
+          (map-matrix : _pointer)
+          -> (_ptr o _CvMat)))
   
   #| Performs generic geometric transformation using the specified coordinate maps |#
   (define-opencv-imgproc cvRemap
