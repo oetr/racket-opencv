@@ -19,7 +19,6 @@
     (begin
       (printf "taking the default image~n")
       (set! image-name "./images/ArucoRectification.png"))
-      ;;(set! image-name "./images/Lena.jpg"))
     (set! image-name (vector-ref arguments 0)))
 
 (define source-window "Source Image")
@@ -32,21 +31,15 @@
 (imshow source-window src)
 (imshow corners-window src-gray)
 
-
-
-(define maxCorners 10)
+(define maxCorners 500)
 (define maxTrackbar 25)
-
-(cvMat-depth src)
-(cvMat-depth src-gray)
-
 
 ;; Parameters for Shi-Tomasi algorithm
 (define corner-count (malloc 'atomic _int 1))
-(ptr-set! corner-count _int 2000)
+(ptr-set! corner-count _int maxCorners)
 (define corners (make-c-array (ptr-ref corner-count _int) _CvPoint2D32f))
 (define qualityLevel 0.001)
-(define minDistance 10.0)
+(define minDistance 5.0)
 (define blockSize 4)
 (define useHarrisDetector 1)
 (define k 0.04)
@@ -58,18 +51,6 @@
 (cvGoodFeaturesToTrack src-gray #f #f (array-ptr corners)
                        corner-count qualityLevel minDistance #f
                        blockSize useHarrisDetector k)
-
-;; Draw detected corners
-;; (define radius 4)
-;; (for ([i (ptr-ref corner-count _int)])
-;;   (define corner (array-ref corners i))
-;;   (cvCircle copy-corners (cvPoint (inexact->exact (round (CvPoint2D32f-x corner)))
-;;                           (inexact->exact (round (CvPoint2D32f-y corner))))
-;;             radius
-;;             (cvScalar (random 256) (random 256) (random 256))
-;;             -1 8 0))
-;;(imshow corners-window copy-corners )
-
 
 ;; Set the neeed parameters to find the refined corners
 (define winSize (make-CvSize 5 5 ))
@@ -101,4 +82,5 @@
 (imshow corners-window copy-corners )
 (cvSaveImage "Corners.png" copy-corners)
 
+(define key (cvWaitKey 0))
 (cvDestroyAllWindows)
