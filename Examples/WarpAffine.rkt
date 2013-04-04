@@ -18,10 +18,10 @@
 (define image-name #f)
 
 (if (zero? (vector-length arguments))
-  (begin
-    (printf "provide image name~n")
-    (exit))
-  (set! image-name (vector-ref arguments 0)))
+    (begin
+      (printf "provide image name~n")
+      (exit))
+    (set! image-name (vector-ref arguments 0)))
 
 (define source-window "Source Image")
 (define warp-window "Warp")
@@ -33,17 +33,17 @@
                                      (CvMat-cols src)
                                      (CvMat-type src)))
 
- (define srcTri
-   (c-array _CvPoint2D32f
-            (make-CvPoint2D32f 0.0                      0.0)
-            (make-CvPoint2D32f (- (CvMat-cols src) 1.0) 0.0)
-            (make-CvPoint2D32f 0.0                      (- (CvMat-rows src) 1.0))))
+(define srcTri
+  (c-array _CvPoint2D32f
+           (make-CvPoint2D32f 0.0                      0.0)
+           (make-CvPoint2D32f (- (CvMat-cols src) 1.0) 0.0)
+           (make-CvPoint2D32f 0.0                      (- (CvMat-rows src) 1.0))))
 
- (define dstTri
-   (c-array _CvPoint2D32f
-            (make-CvPoint2D32f (* (CvMat-cols src) 0.0)  (* (CvMat-rows src) 0.33))
-            (make-CvPoint2D32f (* (CvMat-cols src) 0.85) (* (CvMat-rows src) 0.25))
-            (make-CvPoint2D32f (* (CvMat-cols src) 0.15) (* (CvMat-rows src) 0.7))))
+(define dstTri
+  (c-array _CvPoint2D32f
+           (make-CvPoint2D32f (* (CvMat-cols src) 0.0)  (* (CvMat-rows src) 0.33))
+           (make-CvPoint2D32f (* (CvMat-cols src) 0.85) (* (CvMat-rows src) 0.25))
+           (make-CvPoint2D32f (* (CvMat-cols src) 0.15) (* (CvMat-rows src) 0.7))))
 
 ;; Get the Affine Transform
 (define warp-mat (cvGetAffineTransform (array-ptr srcTri) (array-ptr dstTri)))
@@ -52,7 +52,6 @@
 (cvWarpAffine src warp-dst warp-mat)
 
 ;; Rotating the image after Warp
-
 ;; Compute a rotation matrix with respect to the center of the image
 (define center (make-CvPoint2D32f (/ (CvMat-cols warp-dst) 2.0)
                                   (/ (CvMat-rows warp-dst) 2.0)))
