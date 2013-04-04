@@ -339,6 +339,10 @@
      [rows _int]
      [cols _int]))
 
+  (define (cvMat-size a-mat)
+    (make-CvSize (CvMat-rows a-mat)
+                 (CvMat-cols a-mat)))
+
   #|/**********************************************************************
   *                       Multi-dimensional dense array (CvMatND)         *
   \**********************************************************************|#

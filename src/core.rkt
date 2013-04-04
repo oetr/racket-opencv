@@ -204,6 +204,13 @@
          (array-set! an-array i val))
     an-array)
 
+  ;; (define (make-c-array type n)
+  ;;   (ptr-ref (malloc type n 'atomic)
+  ;;            (_array type n)))
+
+  ;; (define (c-array-set an-array i val)
+  ;;   (array-set! an-array i val))
+
 
   #|**************************************************************************
   Dynamic data structures                                  

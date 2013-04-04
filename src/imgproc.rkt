@@ -212,15 +212,34 @@
 
   #| Warps image with affine transform |#
   (define-opencv-imgproc cvWarpAffine
-    (_fun _pointer _pointer _pointer _int -> _void))
+    (_fun (src dst map-matrix
+               (flags (+ CV_INTER_LINEAR CV_WARP_FILL_OUTLIERS))
+               (fillval (cvScalarAll 0))) ::
+               (src : _pointer)
+               (dst : _pointer)
+               (map-matrix : _pointer)
+               (flags : _int)
+               (fillval : _CvScalar)
+               -> _void))
 
   #| Computes affine transform matrix for mapping src[i] to dst[i] (i=0,1,2) |#
   (define-opencv-imgproc cvGetAffineTransform
-    (_fun _pointer _pointer _pointer -> _pointer))
+    (_fun (src dst mat) ::
+          (src : _pointer)
+          (dst : _pointer)
+          (mat : _pointer)
+          -> _void))
 
   #| Computes rotation_matrix matrix |#
   (define-opencv-imgproc cv2DRotationMatrix
-    (_fun _CvPoint2D32f _double _double _pointer -> _pointer))
+    (_fun (center angle scale) ::
+          (center : _CvPoint2D32f)
+          (angle : _double)
+          (scale : _double)
+          ((cvCreateMat 2 3 CV_32FC1) : _pointer)
+          -> (result : _pointer)
+          -> (ptr-ref result _CvMat)))
+          
 
   #| Warps image with perspective (projective) transform |#
   (define-opencv-imgproc cvWarpPerspective
