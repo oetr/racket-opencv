@@ -227,7 +227,9 @@
   block_size == 0 means that default,
   somewhat optimal size, is used (currently, it is 64K) |#
   (define-opencv-core cvCreateMemStorage
-    (_fun ((block-size 0)) :: (block-size : _int) -> (storage : _pointer)
+    (_fun ((block-size 0)) ::
+          (block-size : _int)
+          -> (storage : _pointer)
           -> (ptr-ref storage _CvMemStorage)))
 
   ;; Creates a memory storage that will borrow memory blocks from parent storage
@@ -317,7 +319,22 @@
   (define-opencv-core cvClearSeq
     (_fun _pointer -> _void))
 
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  #| Retrieves pointer to specified sequence element.
+   Negative indices are supported and mean counting from the end
+  (e.g -1 means the last sequence element) |#
+  (define-opencv-core cvGetSeqElem
+    (_fun _pointer _int -> _pointer))
+
+  ;; Copies sequence content to a continuous piece of memory
+  (define-opencv-core cvCvtSeqToArray
+    (_fun (seq elements (slice CV_WHOLE_SEQ)) ::
+          (seq : (_ptr i _CvSeq))
+          (elements : _pointer)
+          (slice : _CvSlice)
+          -> _pointer))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Drawing
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (define (CV_RGB r g b)

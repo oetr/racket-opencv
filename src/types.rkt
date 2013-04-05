@@ -319,14 +319,14 @@
             [(equal? a-type _int) 2]
             [(equal? a-type _float) 3]
             [(equal? a-type _double) 4]))
-    (if (zero? ptr)
-        ;; make a special case if it is a byte array
-        (make-sized-byte-string (union-ref (CvMat-data a-Mat) ptr)
-                                (* (CvMat-rows a-Mat)
-                                   (CvMat-step a-Mat)))
+    ;; (if (zero? ptr)
+    ;;     ;; make a special case if it is a byte array
+    ;;     (make-sized-byte-string (union-ref (CvMat-data a-Mat) ptr)
+    ;;                             (* (CvMat-rows a-Mat)
+    ;;                                (CvMat-step a-Mat)))
         (ptr-ref
          (union-ref (CvMat-data a-Mat) ptr)
-         (_array a-type (CvMat-rows a-Mat) (CvMat-cols a-Mat)))))
+         (_array a-type (CvMat-rows a-Mat) (CvMat-cols a-Mat))))
 
   (define-cstruct _CvMat
     ([type _int]
@@ -511,8 +511,8 @@
      [bottom _pointer] 		#| First allocated block.                   |#
      [top _pointer] 		#| Current memory block - top of the stack. |#
      [parent _pointer] 		#| We get new blocks from parent as needed. |#
-     [block_size _pointer] 	#| Block size.                              |#
-     [free_space _pointer])) 	#| Remaining free space in current block.   |#
+     [block_size _int] 	        #| Block size.                              |#
+     [free_space _int])) 	#| Remaining free space in current block.   |#
 
   (define-cstruct _CvMemStoragePos
     ([top _pointer]

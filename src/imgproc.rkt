@@ -568,9 +568,15 @@
   (define-opencv-imgproc cvMatchShapes
     (_fun _pointer _pointer _int _double -> _double))
 
-  #| Calculates exact convex hull of 2d point set |#
+  #| Calculates exact convex hull of 2d point set |#  
   (define-opencv-imgproc cvConvexHull2
-    (_fun _pointer _pointer _int _int -> _pointer))
+    (_fun (input (hull-storage (cvCreateMemStorage 0))
+                 (orientation CV_CLOCKWISE) (return-points 0)) ::
+                 (input : _pointer)
+                 (hull-storage : _pointer)
+                 (orientation : _int)
+                 (return-points : _int)
+                 -> (_ptr o _CvSeq)))
 
   #| Checks whether the contour is convex or not (returns 1 if convex, 0 if not) |#
   (define-opencv-imgproc cvCheckContourConvexity
