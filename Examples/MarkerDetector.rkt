@@ -1,11 +1,9 @@
 #! /usr/bin/env racket
 #lang racket
 
-;; Author: Petr Samarin
+;; Author: Peter Samarin
 ;; Date: 2013
-;; Description: subpixel corner detection
-;; converted from C++ code in
-;; http://docs.opencv.org/doc/tutorials/features2d/trackingmotion/corner_subpixeles/corner_subpixeles.html
+;; Finds fiducial markers in an image
 
 ;;; Includes
 (require "../src/core.rkt"
@@ -19,9 +17,10 @@
 (define image-name #f)
 (define output-image #f)
 
+;; take a default image if no other image was provided
 (cond [(zero? (vector-length arguments))
        (printf "taking the default image~n")
-       (set! image-name "images/board.png")
+       (set! image-name "images/Example4.png")
        (set! output-image "images/Corners.png")]
       [(= (vector-length arguments) 1)
        (set! image-name (vector-ref arguments 0))
@@ -31,37 +30,29 @@
        (set! output-image (vector-ref arguments 1))])
 
 (define src (imread image-name))
+
+;; simulate blurred images
 (cvSmooth src src CV_BLUR 1 0 0.0 0.0)
 
-
+;; make a grey image
 (define src-gray  (cvCreateMat (CvMat-rows src) (CvMat-cols src) CV_8UC1))
-
 (cvCvtColor src src-gray CV_BGR2GRAY)
 
+;; threshold the gray image
 (cvThreshold src-gray src-gray 30.0 255.0 CV_THRESH_BINARY)
 (imshow "gray" src-gray)
 
+;; detect contours
 (define storage (cvCreateMemStorage 0))
 (define contour (malloc 'atomic _pointer))
 (cvFindContours src-gray storage (ptr-ref contour _CvSeq)
                 128
                 CV_RETR_EXTERNAL;; CV_CHAIN_APPROX_TC89_KCOS);;CV_CHAIN_APPROX_TC89_L1)
 ;;CV_RETR_EXTERNAL
-;;CV_CHAIN_APPROX_TC89_L1
+;;CV_CHAIN_APPROX_TC89_L1)
 ;;CV_CHAIN_APPROX_SIMPLE)
 ;;CV_RETR_TREE;; CV_RETR_TREE
 CV_CHAIN_APPROX_NONE)
-
-(define (draw-contours! lof-sequences img thickness)
-  (define (random+ limit addition)
-    (+ (random limit) addition))
-  (andmap (lambda (a-sequence)
-            (define color (CV_RGB (random+ 155 100)
-                                  (random+ 155 100)
-                                  (random+ 155 100)))
-            (cvDrawContours img a-sequence  color color -1 thickness)
-            (cvClearSeq a-sequence))
-          lof-sequences))
 
 (define (sequence-chain->list a-seq)
   (define next-ptr (CvSeq-h_next a-seq))  
@@ -70,180 +61,82 @@ CV_CHAIN_APPROX_NONE)
         (cons a-seq (sequence-chain->list next-sequence)))
       (cons a-seq empty)))
 
-(define src-clone (cvCloneMat src))
 
 (define seq (ptr-ref (ptr-ref contour _pointer) _CvSeq))
 (define sequences (sequence-chain->list seq))
-(map CvSeq-total sequences)
+;;(map CvSeq-total sequences)
 
-(define (get-coordinates a-seq)
-  (for/vector ([i (CvSeq-total a-seq)])
-    (define point (ptr-ref (cvGetSeqElem a-seq i) _CvPoint))
-    (list (CvPoint-x point) (CvPoint-y point))))
+;; for each sequence, find bounding rectangle
+(define rects (map cvMinAreaRect2 sequences))
+(define r1 (list-ref rects 12))
+;; (cvRectangle src-clone (make-CvPoint (CvRect-x r1) (CvRect-y r1))
+;;              (make-CvPoint (+ (CvRect-x r1) (CvRect-width r1))
+;;                            (+ (CvRect-y r1) (CvRect-height r1)))
+;;              (CV_RGB 255 0 0))
 
-(define make-point list)
-(define pt-x car)
-(define pt-y cadr)
+(define bounding-rect (cvBoxPoints r1))
+(define pt1 (car bounding-rect))
+(define pt2 (cadr bounding-rect))
+(define pt3 (caddr bounding-rect))
+(define pt4 (cadddr bounding-rect))
+(set! pt1 (make-CvPoint (inexact->exact (round (CvPoint2D32f-x pt1)))
+                        (inexact->exact (round (CvPoint2D32f-y pt1)))))
+(set! pt2 (make-CvPoint (inexact->exact (round (CvPoint2D32f-x pt2)))
+                        (inexact->exact (round (CvPoint2D32f-y pt2)))))
+(set! pt3 (make-CvPoint (inexact->exact (round (CvPoint2D32f-x pt3)))
+                        (inexact->exact (round (CvPoint2D32f-y pt3)))))
+(set! pt4 (make-CvPoint (inexact->exact (round (CvPoint2D32f-x pt4)))
+                        (inexact->exact (round (CvPoint2D32f-y pt4)))))
+(define src-clone (cvCloneMat src))                                
 
-(define (pt- pt1 pt2)
-  (make-point (- (pt-x pt1) (pt-x pt2))
-              (- (pt-y pt1) (pt-y pt2))))
+(cvLine src-clone pt1 pt2 (CV_RGB 255 0 0))
+(cvLine src-clone pt2 pt3 (CV_RGB 255 0 0))
+(cvLine src-clone pt3 pt4 (CV_RGB 255 0 0))
+(cvLine src-clone pt4 pt1 (CV_RGB 255 0 0))
 
-(define (pt+ pt1 pt2)
-  (make-point (+ (pt-x pt1) (pt-x pt2))
-              (+ (pt-y pt1) (pt-y pt2))))
+(imshow "gray" src-clone)
+(CvSeq-total (car sequences))
 
-(define (pt*s pt scalar)
-  (make-point (* (pt-x pt) scalar)
-              (* (pt-y pt) scalar)))
+(define m (cvCreateMat 196 1 CV_32FC2))
+(cvZero m)
+(define m1 (cvCreateMat 196 1 CV_32FC1))
+(cvZero m1)
+(define m2 (cvCreateMat 196 1 CV_32FC1))
+(cvZero m2)
+(define m3 (cvCreateMat 196 1 CV_32FC1))
+(cvZero m3)
+(define m4 (cvCreateMat 196 1 CV_32FC1))
+(cvZero m4)
 
-;; to compute the slope of 2 points
-(define (slope pt1 pt2)
-  (define diff-y (abs (- (pt-y pt1) (pt-y pt2))))
-  (define diff-x (abs (- (pt-x pt1) (pt-x pt2))))
-  (if (zero? diff-x)
-      10
-      (/ diff-y diff-x 1.0)))
+(cvCvtSeqToArray (car sequences)
+                 (cvGetRawData m))
+(cvSplit m m1 m2 #f #f)
 
-(define (dot-product v1 v2)
-  (apply + (map * v1 v2)))
-
-(define (cross-product v1 v2)
-  (- (* (pt-x v1) (pt-y v2))
-     (* (pt-y v1) (pt-x v2))))
-
-;; find the andle between two vectors defined by their
-;; intersection point p2
-(define (find-angle p1 p2 p3)
-  (define v1 (pt- p1 p2))
-  (define v2 (pt- p3 p2))
-  (define d-mul (* (ed v1) (ed v2)))
-  (define angle
-    (if (< (abs d-mul) 1e-7)
-        pi
-        (acos (/ (dot-product v1 v2)
-                 d-mul 1.0))))
-  (real-part angle))
-
-(define (ed pt)
-  (sqrt (+ (sqr (pt-x pt)) (sqr (pt-y pt)))))
-
-(define (line-intersection o1 p1 o2 p2)
-  (define x (pt- o2 o1))
-  (define d1 (pt- p1 o1))
-  (define d2 (pt- p2 o2))
-  (define cross (cross-product d1 d2))
-  (define cross2 (cross-product x d2))
-  (if (< cross 1e-8)
-      #f
-      (let* ([t1 (/ cross2 cross 1.0)]
-             [intersection (pt+ o1 (pt*s d1 t1))])
-        ;; round the intersection
-        (map inexact->exact (map round intersection)))))
-
-(define (remove-close-points seq (min-distance 5))
-  (define len (vector-length seq))
-  (define previous-point (vector-ref seq 0))
-  (for/fold ([result (vector previous-point)]) ([i (in-range 1 len)])
-    (define point (vector-ref seq i))
-    (define distance (ed (pt- previous-point point)))
-    (if (> distance min-distance)
-        (begin 
-          (set! previous-point point)
-          (vector-append (vector point) result))
-        result)))
-
-(define (reduce-contour seq (threshold 1))
-  (define len (vector-length seq))
-  (define lines
-    (let loop ([i 0] [result (list )])
-      (if (= i len)
-          result
-          (let ([next (modulo (+ i 1) len)])
-            (define next2 (modulo (+ i 2) len))
-            (define p1 (vector-ref seq i))
-            (define p2 (vector-ref seq next))
-            (define p3 (vector-ref seq next2))
-            (define angle (find-angle p1 p2 p3))
-            (define center (cvPoint (pt-x p2) (pt-y p2)))
-            (if (or (<= (abs angle) (degrees->radians threshold))
-                    (>= (abs angle) (degrees->radians (- 180.0 threshold))))
-                (loop (+ i 1) (cons (list p1 p3) result))
-                (loop (+ i 1) result))))))
-  lines)
-
-(define W 640)
-(define H 480)
-
-(define (find-and-draw-angles img seq (threshold 2))
-  (define len (vector-length seq))
-  (define font1 (malloc _CvFont 'atomic))
-  (cvInitFont font1 CV_FONT_HERSHEY_SIMPLEX 0.4 0.4)
-  (define lines (reduce-contour seq threshold))
-  ;; compute the direciton of each line
-  (for/list ([line (in-list lines)])
-    (define p1 (car line))
-    (define p2 (cadr line))
-    (define v (pt- p2 p1))
-    ;; find line intersections with the image borders
-    (define new-points
-      (filter identity
-              (list (line-intersection p1 p2 (list 0 0) (list 0 H))
-                    (line-intersection p1 p2 (list 0 0) (list W 0))
-                    (line-intersection p1 p2 (list W H) (list 0 H))
-                    (line-intersection p1 p2 (list W H) (list W 0)))))
-    ;; find the angle of the line
-    (define hypothenuse (sqrt (+ (sqr (pt-x v)) (sqr (pt-y v)))))
-    (if (= (length new-points) 2)
-        (begin
-          (cons (car new-points)
-                (cons (cadr new-points)
-                      (cons p1 (cons p2 (list (radians->degrees
-                                               (asin (/ (pt-y v) hypothenuse)))))))))
-        (begin
-          (cons p1 (cons p2 (list (radians->degrees
-                                   (asin (/ (pt-y v) hypothenuse))))))))))
-
-(define (draw-lines img lines)
-  (andmap (lambda (a-line)
-            (define pt1 (car a-line))
-            (define pt2 (cadr a-line))
-            (cvLine img (cvPoint (pt-x pt1) (pt-y pt1))
-                    (cvPoint (pt-x pt2) (pt-y pt2))
-                    (cvScalar (random 255) (random 255) (random 255)) 1 8 0))
-          lines))
+(define min-i (malloc 'atomic _double))
+(define max-i (malloc 'atomic _double))
+(define min-loc (malloc 'atomic _CvPoint))
+(define max-loc (malloc 'atomic _CvPoint))
+(cvMinMaxLoc m1 min-i max-i min-loc max-loc)
+(ptr-ref min-i _int 0)
+(ptr-ref max-i _int 0)
+(CvPoint-y (ptr-ref min-loc _CvPoint))
+(CvPoint-x (ptr-ref max-loc _CvPoint))
 
 
-(define (detect-and-draw-lines sequences)
-  (andmap (lambda (seq)
-            (draw-lines src-clone
-                        (find-and-draw-angles src-clone
-                                              (remove-close-points
-                                               (get-coordinates
-                                                seq)
-                                               10)
-                                              0.1)))
-          sequences))
+(define p (cvGetRawData m1))
+(for/fold ([min-val 640] [max-i 0] [max-val 0] [min-i 0]) ([i (in-range 0 101)])
+  (define x (ptr-ref p _int i))
+  (define new-min min-val)
+  (define new-max max-val)
+  (if (> min-i x)
+      (set! min-val ))
+  (values (min min-i x)
+          i
+          (max max-i x)
+          i))
 
-(define src-clone (cvCloneMat src))
-(detect-and-draw-lines sequences)
-(imshow "clone" src-clone)
-(cvSaveImage "test.png" src-clone)
+;; (for ([a-sequence sequences])
+;;   (define color (CV_RGB 255 0 0))
+;;   (cvDrawContours src-clone a-sequence color color 0 2))
 
-
-
-(define (detect-and-draw-lines-1 a-seq)
-  (draw-lines src-clone
-              (find-and-draw-angles src-clone
-                                    (remove-close-points
-                                     (get-coordinates
-                                      a-seq)
-                                     10)
-                                    1)))
-
-(define src-clone (cvCloneMat src))
-(andmap detect-and-draw-lines-1 sequences)
-(imshow "clone" src-clone)
-(cvSaveImage "test.png" src-clone)
-
-(cvReleaseMemStorage storage)
+(imshow "gray" src-clone)

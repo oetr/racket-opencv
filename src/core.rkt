@@ -117,15 +117,21 @@
   (define (cvMat rows cols type (data-ptr #f))
     (unless (<= (CV_MAT_DEPTH type) CV_64F)
       (raise-type-error cvMat "<= CV_64F" type))
-    (define arr (cvCreateMatHeader rows cols type))
-    (cvCreateData arr)
-    (when data-ptr
-      ;; find out the right type and point to 0--4
-      ;; for now use ptr = 0
-      (define ptr 0)
-      (union-set! (CvMat-data arr) ptr (array-ptr data-ptr)))
-    arr)
-  
+  (define mat (make-CvMat type (* cols (CV_ELEM_SIZE type))
+                          #f 0 (malloc 'atomic _ubyte) rows cols))
+  mat)
+  ;; (cvCreateData arr)
+  ;;   (define arr (cvCreateMatHeader rows cols type))
+    
+  ;;   (set-CvMat-refcount! arr #f)
+  ;;   (set-CvMat-hdr_refcount! arr 0)
+  ;;   (set-CvMat-hdr_refcount!
+  ;;   m.step = m.cols* CV_ELEM_SIZE(type);
+  ;;   m.hdr_refcount = 0;
+    
+  ;;   (when data-ptr
+  ;;     (cvSetData arr data-ptr (CvMat-step arr)))
+  ;;   arr)  
 
   ;; Releases array data
   (define-opencv-core cvReleaseData
@@ -141,12 +147,13 @@
   In the latter case the function raises an error if
   the array can not be represented as a matrix |#
   (define-opencv-core cvGetRawData
-    (_fun (arr data (step #f) (roi-size #f)) ::
+    (_fun (arr (data #f) (step #f) (roi-size #f)) ::
           (arr : _pointer)
-          (data : (_ptr io (_ptr io _ubyte)))
+          (data : (_ptr o _pointer))
           (step : _pointer)
           (roi-size : _pointer)
-          -> _void))
+          -> _void
+          -> data))
 
   ;; Returns width and height of array in elements
   (define-opencv-core cvGetSize
@@ -157,6 +164,60 @@
     (_fun _pointer -> _void))
 
   (define cvZero cvSetZero)
+
+  #| Splits a multi-channel array into the set of single-channel arrays or
+  extracts particular [color] plane |#
+  (define-opencv-core cvSplit
+    (_fun (src dst0 dst1 dst2 dst3) ::
+          (src :  _pointer)
+          (dst0 : _pointer)
+          (dst1 : _pointer)
+          (dst2 : _pointer)
+          (dst3 : _pointer)
+          -> _void))
+
+  #| Copies several channels from input arrays to
+  certain channels of output arrays |#
+  (define-opencv-core cvMixChannels
+    (_fun (src src-count dst dst-count from-to pair-count) ::
+          (src : (_ptr i _pointer))
+          (src-count : _int)
+          (dst : (_ptr io _pointer))
+          (dst-count : _int)
+          (from-to : (_ptr i _int))
+          (pair-count : _int)
+          -> _void))
+
+  #| Performs linear transformation on every source array element:
+   dst(x,y,c) = scale*src(x,y,c)+shift.
+   Arbitrary combination of input and output array depths are allowed
+   (number of channels must be the same), thus the function can be used
+   for type conversion |#
+  (define-opencv-core cvConvertScale
+    (_fun (src dst (scale 1.0) (shift 0.0)) ::
+          (src   : _pointer)
+          (dst   : _pointer)
+          (scale : _double)
+          (shift : _double)
+          -> _void))
+  (define cvScale  cvConvertScale)
+  (define (cvConvert src dst)
+    (cvConvertScale src dst 1 0))
+
+  #| Performs linear transformation on every source array element,
+   stores absolute value of the result:
+   dst(x,y,c) = abs(scale*src(x,y,c)+shift).
+   destination array must have 8u type.
+  In other cases one may use cvConvertScale + cvAbsDiffS |#
+  (define-opencv-core cvConvertScaleAbs
+    (_fun (src dst (scale 1.0) (shift 0.0)) ::
+          (src   : _pointer)
+          (dst   : _pointer)
+          (scale : _double)
+          (shift : _double)
+          -> _void))
+  
+(define cvCvtScaleAbs  cvConvertScaleAbs)
 
   ;; Copies source array to destination array
   (define-opencv-core cvCopy
@@ -182,16 +243,6 @@
            (cvCopy img out mask)
            out]))
 
-  ;; dst(mask) = src1(mask) + src2(mask)
-  (define-opencv-core cvAdd
-    (_fun (src1 src2 dst (mask #f)) ::
-          (src1 : _pointer)
-          (src2 : _pointer)
-          (dst : _pointer)
-          (mask  : _pointer)
-          -> _void))
-
-  (define-opencv-core cvAddS (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
   (define (make-c-array size type)
     (ptr-ref (malloc 'atomic type size)
@@ -203,14 +254,45 @@
           [i (in-range 0 (length vals))])
          (array-set! an-array i val))
     an-array)
+  
+  ;; ***************************************************************************
+  ;;                   Arithmetic, logic and comparison operations
+  ;;****************************************************************************
+(define-opencv-core cvAdd
+  (_fun (src1 src2 dst (mask #f)) ::
+        (src1 : _pointer)
+        (src2 : _pointer)
+        (dst : _pointer)
+        (mask  : _pointer)
+        -> _void))
 
-  ;; (define (make-c-array type n)
-  ;;   (ptr-ref (malloc type n 'atomic)
-  ;;            (_array type n)))
+(define-opencv-core cvAddS
+  (_fun _pointer _CvScalar _pointer _pointer -> _void))
 
-  ;; (define (c-array-set an-array i val)
-  ;;   (array-set! an-array i val))
+#| dst = src1 * alpha + src2 * beta + gamma |#
+(define-opencv-core cvAddWeighted
+  (_fun (src1 alpha src2 beta gamma dst) ::
+        (src1 : _pointer)
+        (alpha : _double)
+        (src2 : _pointer)
+        (beta : _double)
+        (gamma : _double)
+        (dst : _pointer)
+        -> _void))
 
+  ;; ***************************************************************************
+  ;;                   Array statistics
+  ;;****************************************************************************
+  ;; Finds global minimum, maximum and their positions
+  (define-opencv-core cvMinMaxLoc
+    (_fun (arr min-val max-val (min-loc #f) (max-loc #f) (mask #f)) ::
+          (arr : _pointer)
+          (min-val : _pointer)
+          (max-val : _pointer)
+          (min-loc  : _pointer)
+          (max-loc  : _pointer)
+          (mask : _pointer)
+          -> _void))
 
   #|**************************************************************************
   Dynamic data structures                                  
@@ -319,7 +401,6 @@
   (define-opencv-core cvClearSeq
     (_fun _pointer -> _void))
 
-
   #| Retrieves pointer to specified sequence element.
    Negative indices are supported and mean counting from the end
   (e.g -1 means the last sequence element) |#
@@ -329,10 +410,12 @@
   ;; Copies sequence content to a continuous piece of memory
   (define-opencv-core cvCvtSeqToArray
     (_fun (seq elements (slice CV_WHOLE_SEQ)) ::
-          (seq : (_ptr i _CvSeq))
+          (seq : _pointer)
           (elements : _pointer)
           (slice : _CvSlice)
           -> _pointer))
+
+  
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Drawing

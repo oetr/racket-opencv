@@ -232,7 +232,7 @@
   (define CV_8UC2 (CV_MAKETYPE CV_8U 2))
   (define CV_8UC3 (CV_MAKETYPE CV_8U 3))
   (define CV_8UC4 (CV_MAKETYPE CV_8U 4))
-  (define (CV_8UC n) CV_MAKETYPE(CV_8U n))
+  (define (CV_8UC n) (CV_MAKETYPE CV_8U n))
 
   (define CV_8SC1 (CV_MAKETYPE CV_8S 1))
   (define CV_8SC2 (CV_MAKETYPE CV_8S 2))
@@ -300,15 +300,13 @@
      (bitwise-and (arithmetic-shift (* (+ (/ (ctype-sizeof size_t) 4) 1)
                                        (bitwise-ior 16384 #x3a50))
                                     (- (* (CV_MAT_DEPTH type) 2)))
-                  -3)))               
-
-
+                  -3)))
 
   (define CvMatUnion-data
-    (_union _pointer    ;; byte
-            _pointer    ;; s
-            _pointer      ;; i
-            _pointer    ;; fl 
+    (_union _pointer   ;; byte
+            _pointer  ;; s
+            _pointer  ;; i
+            _pointer  ;; fl 
             _pointer)) ;; db
 
   (define (cvMatData-ptr a-Mat (a-type _byte))
@@ -324,9 +322,9 @@
     ;;     (make-sized-byte-string (union-ref (CvMat-data a-Mat) ptr)
     ;;                             (* (CvMat-rows a-Mat)
     ;;                                (CvMat-step a-Mat)))
-        (ptr-ref
-         (union-ref (CvMat-data a-Mat) ptr)
-         (_array a-type (CvMat-rows a-Mat) (CvMat-cols a-Mat))))
+    (ptr-ref
+     (union-ref (CvMat-data a-Mat) ptr)
+     (_array a-type (CvMat-rows a-Mat) (CvMat-cols a-Mat))))
 
   (define-cstruct _CvMat
     ([type _int]
@@ -347,6 +345,41 @@
     (/ (CvMat-step a-mat)
        (CvMat-cols a-mat)
        1.0))
+
+
+  ;; (define (CV_MAT_ELEM_PTR_FAST mat row col pix_size)
+  ;;   (define type (CV_MAT_TYPE (CvMat-type mat)))
+  ;;   (unless (and (< row (CvMat-rows mat))
+  ;;                (< col (CvMat-cols mat)))
+  ;;     (error "index out of range~n"))
+  ;;   (define ptr
+  ;;     (cond [(or (equal? a-type _byte)
+  ;;                (equal? a-type _ubyte)) 0]
+  ;;           [(equal? a-type _short) 1]
+  ;;           [(equal? a-type _int) 2]
+  ;;           [(equal? a-type _float) 3]
+  ;;           [(equal? a-type _double) 4]))
+  ;;   (ptr-ref
+  ;;    (union-ref (CvMat-data mat) ptr)
+  ;;    (_array a-type (CvMat-rows a-Mat) (CvMat-cols a-Mat))))
+  ;;   ()
+  ;; #define CV_MAT_ELEM_PTR_FAST( mat, row, col, pix_size )  \
+  ;;   (assert( (unsigned)(row) < (unsigned)(mat).rows &&   \
+  ;;            (unsigned)(col) < (unsigned)(mat).cols ),   \
+  ;;            (mat).data.ptr + (size_t)(mat).step*(row) + (pix_size)*(col))
+
+    
+  ;; (define CV_MAT_ELEM 
+  ;; #define CV_MAT_ELEM( mat, elemtype, row, col )           \
+  ;; (*(elemtype*)CV_MAT_ELEM_PTR_FAST( mat, row, col, sizeof(elemtype)))
+  
+  ;; (define (cvmGet mat row col)
+  ;;   (define type (CV_MAT_TYPE (CvMat-type mat)))
+  ;;   (unless (and (< row (CvMat-rows mat))
+  ;;                (< col (CvMat-cols mat)))
+  ;;     (error 'cvmGet "index out of range~n"))
+  ;;   (if (= type CV_32FC1)
+
 
   #|/**********************************************************************
   *                       Multi-dimensional dense array (CvMatND)         *

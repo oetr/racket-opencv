@@ -550,7 +550,10 @@
   #| Calculates contour boundning rectangle (update=1) or
   just retrieves pre-calculated rectangle (update=0) |#
   (define-opencv-imgproc cvBoundingRect
-    (_fun _pointer _int -> _CvRect))
+    (_fun (points (update 0)) ::
+          (points : _pointer)
+          (update : _int)
+          -> _CvRect))
 
   #| Calculates area of a contour or contour segment |#
   (define-opencv-imgproc cvContourArea
@@ -558,7 +561,10 @@
 
   #| Finds minimum area rotated rectangle bounding a set of points |#
   (define-opencv-imgproc cvMinAreaRect2
-    (_fun _pointer _pointer -> _CvBox2D))
+    (_fun (points (storage #f)) ::
+          (points : _pointer)
+          (storage : _pointer)
+          -> _CvBox2D))
 
   #| Finds minimum enclosing circle for a set of points |#
   (define-opencv-imgproc cvMinEnclosingCircle
@@ -596,7 +602,11 @@
 
   #| Finds coordinates of the box vertices |#
   (define-opencv-imgproc cvBoxPoints
-    (_fun _CvBox2D (_array _CvPoint2D32f 4) -> _void))
+    (_fun (box) ::
+          (box : _CvBox2D)
+          (pt : (_list o _CvPoint2D32f 4))
+          -> _void
+          -> pt))
 
   #| Initializes sequence header for a matrix (column or row vector) of points -
   a wrapper for cvMakeSeqHeaderForArray
