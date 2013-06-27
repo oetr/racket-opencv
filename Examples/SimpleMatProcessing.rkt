@@ -1,11 +1,11 @@
 #! /usr/bin/env racket
 #lang racket
 
-;; Author: Petr Samarin
+;; Author: Peter Samarin
 ;; Date: 2012
 ;; Description:
 ;; converted from an example in opencv documentation:
-;;http://docs.opencv.org/doc/tutorials/imgproc/gausian_median_blur_bilateral_filter/gausian_median_blur_bilateral_filter.html
+;; http://docs.opencv.org/doc/tutorials/imgproc/gausian_median_blur_bilateral_filter/gausian_median_blur_bilateral_filter.html
 ;; this example loads an image
 ;; Applies 4 different kinds of filters and shows the filtered images sequentially
 
@@ -42,12 +42,10 @@
 
 ;; load an image into a Mat array
 (define src (imread "images/Lena.jpg"))
-(define dst (cvMat (CvMat-rows src) (CvMat-cols src) (CvMat-type src)))
+(define dst (cvCloneMat src))
 
 (when (not (zero? (display-caption "Original Image")))
   (exit))
-
-(set! dst (cvCloneMat src))
 
 (when (not (zero? (display-dst DELAY_CAPTION)))
   (exit))

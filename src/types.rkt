@@ -1,8 +1,8 @@
 (module types racket
-  (provide (all-defined-out))
+  (provide (all-defined-out))  
 
   (require ffi/unsafe
-           ffi/unsafe/define)  
+           ffi/unsafe/define)
 
   #| CvArr* is used to pass arbitrary
   * array-like data structures
@@ -345,7 +345,6 @@
     (/ (CvMat-step a-mat)
        (CvMat-cols a-mat)
        1.0))
-
 
   ;; (define (CV_MAT_ELEM_PTR_FAST mat row col pix_size)
   ;;   (define type (CV_MAT_TYPE (CvMat-type mat)))

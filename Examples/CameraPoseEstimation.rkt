@@ -56,6 +56,56 @@
 
 ;; compute the matrix for rectification
 (define rect-mat (cvGetPerspectiveTransform (array-ptr srcPts) (array-ptr dstPts)))
+(define srcPts
+  (c-array _CvPoint2D32f
+           (make-CvPoint2D32f 24.0 17.0)
+           (make-CvPoint2D32f 80.0 30.0)
+           (make-CvPoint2D32f 76.0 58.0)
+           (make-CvPoint2D32f 18.0 42.0)))
+
+(define R (cvCreateMat 3 3 CV_32FC1))
+(define Rodr (cvCreateMat 3 1 CV_32FC1))
+(cvZero R)
+(array-ref (cvMatData-ptr R _float) 0 0)
+(array-set! (cvMatData-ptr R _float) 0 0 0.45197)
+(array-set! (cvMatData-ptr R _float) 0 1 0.81380)
+(array-set! (cvMatData-ptr R _float) 0 2 0.36532)
+(array-set! (cvMatData-ptr R _float) 1 0 -0.86341)
+(array-set! (cvMatData-ptr R _float) 1 1 0.29620)
+(array-set! (cvMatData-ptr R _float) 1 2 0.40839)
+(array-set! (cvMatData-ptr R _float) 2 0 0.22414)
+(array-set! (cvMatData-ptr R _float) 2 1 -0.5)
+(array-set! (cvMatData-ptr R _float) 2 2 0.83652)
+(cvRodrigues2 R Rodr)
+(array-ref (cvMatData-ptr Rodr _float) 0 0)
+(array-ref (cvMatData-ptr Rodr _float) 1 0)
+(array-ref (cvMatData-ptr Rodr _float) 2 0)
+
+;; 30 
+(set-camera-angle 0 30 0)
+(set-camera-angle 0 0 15)
+(set-camera-angle 0 0 0)
+(set-camera-angle 70 30 15)
+(set-camera-position! 0.0 0.0 3)
+(define res (glGetFloatv GL_MODELVIEW_MATRIX #:size 16))
+(glGetFloatv GL_PROJECTION_MATRIX #:size 16)
+(glGetFloatv GL_VIEWPORT #:size 8)
+
+
+(define W 640)
+(define H 480)
+(define sensor-focal-length 6)
+(define sensor-h 2.88)
+(define tan-fov-v/2 (rad2deg (atan (/ sensor-height sensor-focal-length 2))))
+(define distance-sensor-h=480 (/ (* sensor-focal-length H) 2.88))
+(/ (* sensor-focal-length W) distance-sensor-h=480)
+(/ (* 640 2.88) 480)
+(/ (* 640 4.512) 752)
+
+(define fov-v (compute-fov 2.88 6.0))
+(define fov-h (rad2deg (* 2 (atan (/ (* W 2.88)
+                                     (* H 2 6))))))
+
 
 ;; rectify the image
 (cvWarpPerspective src rectified-dst rect-mat)
