@@ -4,3 +4,4 @@
 !.gitignore
 !src/
 !tutorials
+!tutorials/*/
