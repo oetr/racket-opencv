@@ -189,6 +189,9 @@
           -> (r : _int)
           -> (check-return r 'cvSaveImage)))
 
+  (define (imwrite filename img (params #f))
+    (cvSaveImage filename img params))
+
   ;; decode image stored in the buffer
   (define-opencv-highgui cvDecodeImage
     (_fun _pointer _int -> _pointer))

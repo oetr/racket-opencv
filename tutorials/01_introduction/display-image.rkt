@@ -2,17 +2,17 @@
 #lang racket
 
 ;; Author: Peter Samarin
-;; Description: Load and display an image specified on the command line
+;; Description: Load, display, and save an image specified on the command line
 ;; converted from an example in opencv documentation
 ;; http://docs.opencv.org/doc/tutorials/tutorials.html
 
 ;;; Includes
-(require "../src/core.rkt"
-         "../src/highgui.rkt")
+(require "../../src/core.rkt"
+         "../../src/highgui.rkt")
 
 (define arguments (current-command-line-arguments))
 (unless (= (vector-length arguments) 1)
-  (printf "Usage: ./display-image.rkt imageToLoadAndDisplay~n")
+  (printf "No image data~n")
   (exit))
 
 ;; Read the file

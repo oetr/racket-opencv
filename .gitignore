@@ -3,4 +3,4 @@
 !*.c
 !.gitignore
 !src/
-!Examples/
+!tutorials

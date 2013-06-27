@@ -197,6 +197,14 @@
   (define-opencv-imgproc cvCvtColor
     (_fun _pointer _pointer _int -> _void))
 
+  #| A version of cvtColor that creates the destination image internally |#
+  (define (cvt-color src code dst-cn)
+    (define dst (cvCreateMat (CvMat-rows src)
+                             (CvMat-cols src)
+                             dst-cn))
+    (cvCvtColor src dst code)
+    dst)
+
   (define (convert-color an-image new-depth new-channels conversion-flag)
     (define out-image (cvCreateImage
                        (make-CvSize (IplImage-width an-image)
