@@ -1,21 +1,21 @@
 #! /usr/bin/env racket
 #lang racket
 
-;; Author: Petr Samarin
-;; Date: 2012
+;; Author: Peter Samarin
+;; Date: 2013
 ;; Description: Cascade classifier
 ;; ported from an OpenCV tutorial http://docs.opencv.org/doc/tutorials/objdetect/cascade_classifier/cascade_classifier.html
 
-(require "../src/types.rkt"
-         "../src/highgui.rkt"
-         "../src/core.rkt"
-         "../src/imgproc.rkt"
-         "../src/objdetect.rkt"
+(require "../../src/types.rkt"
+         "../../src/highgui.rkt"
+         "../../src/core.rkt"
+         "../../src/imgproc.rkt"
+         "../../src/objdetect.rkt"
          ffi/unsafe)
 
 ;; Global variables
-(define face-cascade-name "data/haarcascade_frontalface_alt.xml")
-(define eyes-cascade-name "data/haarcascade_eye_tree_eyeglasses.xml")
+(define face-cascade-name "../data/haarcascade_frontalface_alt.xml")
+(define eyes-cascade-name "../data/haarcascade_eye_tree_eyeglasses.xml")
 (define window-name "Capture - Face detection")
 ;; load classifiers
 (define face-cascade (cvLoadHaarClassifierCascade face-cascade-name
@@ -48,7 +48,6 @@
   (define seq (cvHaarDetectObjects frame-gray face-cascade mem 1.1 2
                                    (bitwise-ior 0 CV_HAAR_SCALE_IMAGE)
                                    (make-CvSize 3 3)))
-
   
 
   (define (traverse-sequence a-seq)
@@ -58,30 +57,37 @@
       (define start-index (CvSeqBlock-start_index a-block))
       (define count (CvSeqBlock-count a-block))
       (for ([i (in-range count)])
-           (define rect (ptr-ref (CvSeqBlock-data a-block) _CvRect i))
-           (define x (CvRect-x rect))
-           (define y (CvRect-y rect))
-           (define w (CvRect-width rect))
-           (define h (CvRect-height rect))
-           (printf "found face: ~a, ~a, ~a, ~a~n" x y w h)
-           (cvRectangle frame-gray
-                        (cvPoint x y)
-                        (cvPoint (+ x w) (+ y h))
-                        (cvRGB 0 255 0)))
-           (when (and next (not (zero? total)))
+        (define rect (ptr-ref (CvSeqBlock-data a-block) _CvRect i))
+        (define x (CvRect-x rect))
+        (define y (CvRect-y rect))
+        (define w (CvRect-width rect))
+        (define h (CvRect-height rect))
+        (cvRectangle frame
+                     (cvPoint x y)
+                     (cvPoint (+ x w) (+ y h))
+                     (cvRGB 0 255 0))
+        (cvRectangle frame-gray
+                     (cvPoint x y)
+                     (cvPoint (+ x w) (+ y h))
+                     (cvRGB 0 255 0)))
+      (when (and next (not (zero? total)))
         (traverse-sequence-aux (- total 1) next)))
     (define first-block (seq-first a-seq))
     (when first-block
       (traverse-sequence-aux total first-block)))
 
   (traverse-sequence seq)
-  (imshow window-name frame-gray))
+  (imshow window-name frame)
+  (imshow "gray" frame-gray)
+
+  ;; release unused memory before loosing the pointers
+  (cvReleaseImage frame-gray)
+  (cvReleaseMemStorage mem))
 
 
 (let loop ()
   (set! frame (cvQueryFrame capture))
   (detect-and-display frame)
-  ;;(cvReleaseImage out)  
   (unless (>= (cvWaitKey 5) 0)
     (loop)))
 
