@@ -1,4 +1,4 @@
-;; Author: Petr Samarin
+;; Author: Peter Samarin
 ;; Description: Porting callib3d.hpp to Racket
 
 (module core racket
@@ -17,12 +17,12 @@
     (_fun _pointer _int -> _pointer))
 
   #| Runs POSIT (POSe from ITeration) algorithm for determining 3d position of
-   an object given its model and projection in a weak-perspective case |#
+  an object given its model and projection in a weak-perspective case |#
   (define-opencv-calib3d cvPOSIT
     (_fun _pointer _pointer _double _CvTermCriteria _pointer _pointer -> _void))
 
   #| Finds extrinsic camera parameters from
-   a few known corresponding point pairs and intrinsic parameters |#
+  a few known corresponding point pairs and intrinsic parameters |#
   (define-opencv-calib3d cvFindExtrinsicCameraParams2
     (_fun (object-points image-points camera-matrix distortion-coeffs rotation-vector
                          translation-vector (use-extrinsic-guess 0)) ::
