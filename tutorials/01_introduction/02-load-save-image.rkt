@@ -2,15 +2,15 @@
 #lang racket
 
 ;; Author: Peter Samarin
-;; Description: Load and display an image specified on the command line
+;; Description: Load and display an image specified on the command line, then 
+;;              convert the image into grayscale and save it on the hard disk
 ;; converted from an example in opencv documentation
 ;; http://docs.opencv.org/doc/tutorials/tutorials.html
 
 ;;; Includes
-(require "../../src/core.rkt"
-         "../../src/types.rkt"
-         "../../src/highgui.rkt"
-         "../../src/imgproc.rkt")
+(require (planet petr/opencv/highgui)
+         (planet petr/opencv/imgproc))
+
 
 ;; Get path to the image from the command line arguments
 (define arguments (current-command-line-arguments))
@@ -21,7 +21,7 @@
 
 
 ;; Read the file
-(define image (imread "../images/Lena.jpg" CV_LOAD_IMAGE_COLOR))
+(define image (imread image-name CV_LOAD_IMAGE_COLOR))
 ;; Convert to gray
 (define gray (cvt-color image CV_BGR2GRAY CV_8UC1))
 

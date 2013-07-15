@@ -6,8 +6,11 @@
   ;; Racket Foreign interface
   (require ffi/unsafe
            ffi/unsafe/define
+           ffi/cvector
+           ffi/unsafe/cvector
            "core.rkt"
-           "types.rkt")
+           "types.rkt"
+           "utilities.rkt")
   
   (define-ffi-definer define-opencv-imgproc
     (ffi-lib "/opt/local/lib/libopencv_imgproc"))
@@ -774,7 +777,14 @@
 
   #| Adjust corner position using some sort of gradient search |#
   (define-opencv-imgproc cvFindCornerSubPix
-    (_fun _pointer _pointer _int _CvSize _CvSize _CvTermCriteria -> _void))
+    (_fun (image corners count winSize zeroZone criteria) ::
+          (image    : (_ptr i _CvMat))
+          (corners  : _cvector)
+          (count    : _int)
+          (winSize  : _CvSize)
+          (zeroZone : _CvSize)
+          (criteria : _CvTermCriteria)
+          -> _void))
 
   #| Finds a sparse set of points within the selected region
   that seem to be easy to track |#
@@ -784,15 +794,16 @@
                  (image         : (_ptr i _CvMat))
                  (eig-image     : _pointer)
                  (temp-image    : _pointer)
-                 (corners       : _pointer)
-                 (corner-count  : _pointer)
+                 (corners       : _cvector)
+                 (nof-detected  : (_ptr io _int) = corner-count)
                  (quality-level : _double)
                  (min-distance  : _double)
                  (mask          : _pointer)
                  (block-size    : _int)
                  (use-harris    : _int)
                  (k             : _double)
-                 -> _void))
+                 -> _void
+                 -> nof-detected))
 
   #| Finds lines on binary image using one of several methods.
   line_storage is either memory storage or 1 x <max number of lines> CvMat, its

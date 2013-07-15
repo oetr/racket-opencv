@@ -158,16 +158,15 @@
   (define-opencv-highgui cvLoadImage
     (_fun (filename (iscolor CV_LOAD_IMAGE_COLOR)) ::
           (filename : _string)
-          (iscolor : _int)
+          (iscolor  : _int)
           -> (r : (_ptr io _IplImage))
           -> (ptr-ref r _IplImage)))
 
   (define-opencv-highgui cvLoadImageM
     (_fun (filename (iscolor CV_LOAD_IMAGE_COLOR)) ::
           (filename : _string)
-          (iscolor : _int)
-          -> (r : (_ptr io _CvMat))
-          -> (ptr-ref r _CvMat)))
+          (iscolor  : _int)
+          -> (r : (_ptr o _CvMat))))
 
   (define imread cvLoadImageM)  
 
