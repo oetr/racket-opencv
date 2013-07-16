@@ -284,7 +284,9 @@
   ;; frame decompression, flipping etc.
   ;; !!!DO NOT RELEASE or MODIFY the retrieved frame!!!
   (define-opencv-highgui cvRetrieveFrame
-    (_fun _pointer _int -> _pointer))
+    (_fun _pointer _int
+          -> (image : _pointer)
+          -> (ptr-ref image _IplImage)))
   
   ;; just a combination of cvGrabFrame and cvRetrieveFrame
   ;; !!!DO NOT RELEASE or MODIFY the retrieved frame!!!
@@ -296,6 +298,16 @@
   ;; stop capturing/reading and free resources
   (define-opencv-highgui cvReleaseCapture
     (_fun (_ptr i _pointer) -> _void))
+
+  (define (cv-query-frame capture)
+    (define image (cvQueryFrame capture))
+    (define mat (cvCreateMat (IplImage-height image)
+                             (IplImage-width image)
+                             (CV_MAKETYPE (IplImage-depth image)
+                                          (IplImage-nChannels image))))
+    (cvConvert image mat)
+    (cvReleaseImage image)
+    mat)
 
   ;; *************************************************************
   ;; modes of the controlling registers (can be: auto, manual,

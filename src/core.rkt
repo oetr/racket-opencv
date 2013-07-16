@@ -36,11 +36,11 @@
 
   #| Releases (i.e. deallocates) IPL image header |#
   (define-opencv-core cvReleaseImageHeader
-    (_fun (_ptr i _pointer) -> _void))
+    (_fun (_ptr io _pointer) -> _void))
 
   #| Releases IPL image header and data |#
   (define-opencv-core cvReleaseImage
-    (_fun (_ptr i _pointer) -> _void))
+    (_fun (_ptr io _pointer) -> _void))
 
   (define (cvReleaseImages . images)
     (andmap cvReleaseImage images))
@@ -105,6 +105,119 @@
     (_fun _pointer
           -> (mat : _pointer)
           -> (ptr-ref mat _CvMat)))
+
+  #| Makes a new matrix from <rect> subrectangle of input array.
+  No data is copied |#
+  (define-opencv-core cvGetSubRect
+    (_fun _pointer _pointer _CvRect
+          -> (mat : _pointer)
+          -> (ptr-ref mat _CvMat)))
+  
+  (define cvGetSubArr cvGetSubRect)
+
+  #| Selects row span of the input array: arr(start_row:delta_row:end_row,:)
+  (end_row is not included into the span). |#
+  (define-opencv-core cvGetRows
+    (_fun (arr submat start-row end-row (delta-row 1)) ::
+          [arr       : _pointer]
+          [submat    : _pointer]
+          [start-row : _int]
+          [end-row   : _int]
+          [delta-row : _int]
+          -> (mat : _pointer)
+          -> (ptr-ref mat _CvMat)))
+
+  (define (cvGetRow arr submat row)
+    (cvGetRows arr submat row (+ row 1)))
+
+  #| Selects column span of the input array: arr(:,start_col:end_col)
+   (end_col is not included into the span) |#
+  (define-opencv-core cvGetCols
+    (_fun _pointer _pointer _int _int
+          -> (mat : _pointer)
+          -> (ptr-ref mat _CvMat)))
+
+  (define (cvGetCol arr submat col)
+    (cvGetCols arr submat col (+ col 1)))
+
+
+
+  
+  #| Select a diagonal of the input array.
+   (diag = 0 means the main diagonal, >0 means a diagonal above the main one,
+   <0 - below the main one).
+  The diagonal will be represented as a column (nx1 matrix). |#
+  (define-opencv-core cvGetDiag
+    (_fun (arr submat (diag 0)) ::
+          [arr    : _pointer]
+          [submat : _pointer]
+          [diag   : _int]
+          -> (mat : _pointer)
+          -> (ptr-ref mat _CvMat)))
+  
+
+  ;; low-level scalar <-> raw data conversion functions
+  (define-opencv-core cvScalarToRawData
+    (_fun (scalar data type (extend-to-12 0)) ::
+          [scalar       : _pointer]
+          [data         : _pointer]
+          [type         : _int]
+          [extend-to-12 : _int]
+          -> _void))
+
+  (define-opencv-core cvRawDataToScalar
+    (_fun _pointer _int _pointer -> _void))
+
+  ;; Allocates and initializes CvMatND header
+  (define-opencv-core cvCreateMatNDHeader
+    (_fun _int _pointer _int -> _pointer))
+
+  ;; Allocates and initializes CvMatND header and allocates data
+  (define-opencv-core cvCreateMatND
+    (_fun _int _pointer _int -> _pointer))
+  
+  ;; Initializes preallocated CvMatND header
+  (define-opencv-core cvInitMatNDHeader
+    (_fun _pointer _int _pointer _int _pointer -> _pointer))
+
+
+  ;;;;;;;;; matrix iterator: used for n-ary operations on dense arrays ;;;;;;;
+  (define CV_MAX_ARR 10)
+
+  ;; (define-cstruct _CvNArrayIterator
+  ;;   ([count _int] ;; number of arrays
+  ;;    [dims _int] ;; number of dimensions to iterate
+  ;;    [size _CvSize] ;; maximal common linear size: { width = size, height = 1 }
+  ;;    [ptr _pointer] ;; poitners to the array slices
+  ;;    [stack (_array _int CV_MAX_DIM)] ;; for internal use
+  ;;    [hdr _pointer])) ;; pointers to the headers of processed matrices
+
+  (define CV_NO_DEPTH_CHECK     1)
+  (define CV_NO_CN_CHECK        2)
+  (define CV_NO_SIZE_CHECK      4)
+
+
+  #| Converts CvArr (IplImage or CvMat,...) to CvMat.
+   If the last parameter is non-zero, function can
+   convert multi(>2)-dimensional array to CvMat as long as
+   the last array's dimension is continous. The resultant
+  matrix will be have appropriate (a huge) number of rows |#
+  (define-opencv-core cvGetMat
+    (_fun (arr header (coi #f) (allowND 0)) ::
+          [arr : _pointer]
+          [header : _pointer]
+          [coi : _pointer]
+          [allowND : _int]
+          -> (mat : _pointer)
+          -> (ptr-ref mat _CvMat)))
+
+  ;; Converts CvArr (IplImage or CvMat) to IplImage
+  (define-opencv-core cvGetImage
+    (_fun (arr image-header) ::
+          [arr : _pointer]
+          [image-header : _pointer]
+          -> (image : _pointer)
+          -> (ptr-ref image _IplImage)))
 
   ;; Allocates array data
   (define-opencv-core cvCreateData
@@ -202,7 +315,7 @@
           -> _void))
   (define cvScale  cvConvertScale)
   (define (cvConvert src dst)
-    (cvConvertScale src dst 1 0))
+    (cvConvertScale src dst 1.0 0.0))
 
   #| Performs linear transformation on every source array element,
    stores absolute value of the result:
@@ -535,14 +648,14 @@
   (define-opencv-core cvDrawContours
     (_fun (img contour external-color hole-color max-level
                (thickness 1) (line-type 8) (offset (cvPoint 0 0))) ::
-               [img : _pointer]
-               [contour : _pointer]
+               [img            : _pointer]
+               [contour        : _pointer]
                [external-color : _CvScalar]
-               [hole-color : _CvScalar]
-               [max-level : _int]
-               [thickness : _int]
-               [line-type : _int]
-               [offset : _CvPoint] -> _void))  
+               [hole-color     : _CvScalar]
+               [max-level      : _int]
+               [thickness      : _int]
+               [line-type      : _int]
+               [offset         : _CvPoint] -> _void))  
 
   #|************************ Adding own types **************************|#
   (define-opencv-core cvRegisterType

@@ -1,6 +1,5 @@
 This project ports a subset of the [[http://opencv.org/][OpenCV]] library to Racket by using the [[http://docs.racket-lang.org/foreign/index.html?q=ctype&q=_cpointer&q=make-cvector&q=time*&q=time&q=yield][Racket Foreign Interface]].
-To get started, check the /turorials/ folder.
-It contains many of the official OpenCV tutorials converted to Racket.
+Check the /turorials/ folder to get started.
 
 * TODO Installation
 

@@ -224,7 +224,8 @@
 
   (define (CV_MAKETYPE depth cn)
     (+ (CV_MAT_DEPTH depth)
-       (arithmetic-shift (- cn 1) CV_CN_SHIFT)))
+       (arithmetic-shift (- cn 1)
+                         CV_CN_SHIFT)))
   
   (define CV_MAKE_TYPE CV_MAKETYPE)
 
@@ -343,8 +344,7 @@
 
   (define (cvMat-depth a-mat)
     (/ (CvMat-step a-mat)
-       (CvMat-cols a-mat)
-       1.0))
+       (CvMat-cols a-mat)))
 
   ;; (define (CV_MAT_ELEM_PTR_FAST mat row col pix_size)
   ;;   (define type (CV_MAT_TYPE (CvMat-type mat)))
