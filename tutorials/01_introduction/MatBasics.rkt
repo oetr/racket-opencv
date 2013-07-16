@@ -1,15 +1,13 @@
 #! /usr/bin/env racket
 #lang racket
 
-;; Author: Petr Samarin
-;; Date: 2012
+;; Author: Peter Samarin
+;; Date: 2013
 ;; Description: simple matrix manipulation
 
 ;;; libraries
-(require "../src/types.rkt"
-         "../src/highgui.rkt"
-         "../src/core.rkt"
-         "../src/imgproc.rkt"
+(require (planet petr/opencv/highgui)
+         (planet petr/opencv/imgproc)
          ffi/unsafe)
 
 ;;; a c-array of doubles

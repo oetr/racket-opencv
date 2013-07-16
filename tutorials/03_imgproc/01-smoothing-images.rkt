@@ -10,10 +10,8 @@
 ;; Applies 4 different kinds of filters and shows the filtered images sequentially
 
 ;;; Includes
-(require "../src/types.rkt"
-         "../src/highgui.rkt"
-         "../src/core.rkt"
-         "../src/imgproc.rkt"
+(require (planet petr/opencv/highgui)
+         (planet petr/opencv/imgproc)
          ffi/unsafe
          ffi/unsafe/define)
 
@@ -41,7 +39,7 @@
 (define window-name "Filter Demo 1")
 
 ;; load an image into a Mat array
-(define src (imread "images/Lena.jpg"))
+(define src (imread "../images/Lena.jpg"))
 (define dst (cvCloneMat src))
 
 (when (not (zero? (display-caption "Original Image")))

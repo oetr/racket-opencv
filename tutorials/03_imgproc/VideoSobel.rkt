@@ -1,18 +1,14 @@
 #! /usr/bin/env racket
 #lang racket
 
-;; Author: Petr Samarin
+;; Author: Peter Samarin
 ;; Date: 2012
-;; Description:
-;; Capture video from a camera
-;; if some key is pressed while the focus is on the video window, the application terminates
+;; Description: Sobel detection on camera images
 ;; Tested with iSight camera of my MacBook Pro
 
 ;;; Includes
-(require "../src/types.rkt"
-         "../src/highgui.rkt"
-         "../src/core.rkt"
-         "../src/imgproc.rkt")
+(require (planet petr/opencv/highgui)
+         (planet petr/opencv/imgproc))
 
 ;; Open video capture of camera 0
 (define capture (cvCaptureFromCAM 0))
@@ -50,8 +46,6 @@
   ;; Copy the IplImage into another one,
   ;; so that we can display and modify it
   (cvCopy captured-image big-frame #f)
-  ;;(cvPyrDown big-frame frame)
-  ;;(cvSmooth big-frame big-frame CV_GAUSSIAN 1 0 0.0 0.0)
   (cvCvtColor big-frame frame-gray CV_RGB2GRAY)
 
   ;; Sobel edge detection

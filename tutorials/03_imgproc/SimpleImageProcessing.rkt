@@ -1,8 +1,8 @@
 #! /usr/bin/env racket
 #lang racket
 
-;; Author: Petr Samarin
-;; Date: 2012
+;; Author: Peter Samarin
+;; Date: 2013
 ;; Description:
 ;; 1) Load an image
 ;; 2) Set region of interest (ROI) rectangle
@@ -13,13 +13,11 @@
 ;; and the book "Learning OpenCV" by Bradski and Kaehler, 2008
 
 ;;; Includes
-(require "../src/types.rkt"
-         "../src/highgui.rkt"
-         "../src/core.rkt"
-         "../src/imgproc.rkt")
+(require (planet petr/opencv/highgui)
+         (planet petr/opencv/imgproc))
 
 ;;; Load an image from the hard disk
-(define img (cvLoadImage "images/test.png" CV_LOAD_IMAGE_COLOR))
+(define img (cvLoadImage "../images/Lena.jpg" CV_LOAD_IMAGE_COLOR))
 
 ;;; Get image properties
 (define height     (IplImage-height img))
@@ -49,23 +47,28 @@
 ;; Invert all pixel values
 ;; Doing this in Racket is slower than in C by a lot, but the speed is close to
 ;; Racket's native vectors
+(printf "Inverting the image in Racket~n")
 (time
-(let loop ([i (- (* width height channels) 1)])
-  (when (>= i 0)
-    ;; invert each pixel channel-wise
-    (bytes-set! data i (- 255 (bytes-ref data i)))
-    (loop (- i 1)))))
+ (let loop ([i (- (* width height channels) 1)])
+   (when (>= i 0)
+     ;; invert each pixel channel-wise
+     (bytes-set! data i (- 255 (bytes-ref data i)))
+     (loop (- i 1)))))
+
+(collect-garbage)
+
+(printf "Inverting the image using OpenCV~n")
+(time (cvNot img img))
 
 ;;; Show the image
 ;; it is not necessary to create a named window before showing the image
 ;; (cvNamedWindow "Main Window" CV_WINDOW_AUTOSIZE)
-(cvShowImage "Main Window" img)
+(imshow "Main Window" img)
 (define x (cvGetWindowHandle "Main Window"))
-(cvMoveWindow "Main Window" 100 100)
+(cvMoveWindow "Main Window" 500 150)
 
 ;;; Wait for a key before destroying the window
 (define key (cvWaitKey 0))
 (printf "received key: ~a~n" key)
 
-;;; Destroy image window
-(cvDestroyWindow "Main Window")
+(cvDestroyAllWindows)

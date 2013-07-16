@@ -9,10 +9,8 @@
 ;; Tested with iSight camera of my MacBook Pro
 
 ;;; Includes
-(require "../src/types.rkt"
-         "../src/core.rkt"
-         "../src/highgui.rkt"
-         "../src/imgproc.rkt")
+(require (planet petr/opencv/highgui)
+         (planet petr/opencv/imgproc))
 
 (define capture (cvCaptureFromCAM 0))
 
@@ -36,10 +34,10 @@
 
 (let loop ()
   (set! captured-image (cvQueryFrame capture))  
-  (cvShowImage "Video Capture" captured-image)
+  (cvShowImage "Video Simple" captured-image)
   (unless (>= (cvWaitKey 1) 0)
     (loop)))
 
 ;; clean up
 (cvReleaseCapture capture)
-(cvDestroyWindow "Video Capture")
+(cvDestroyAllWindows)

@@ -1,20 +1,16 @@
 #! /usr/bin/env racket
 #lang racket
 
-;; Author: Petr Samarin
-;; Date: 2012
-;; Description:
-;; Capture video from a camera
-;; apply canny filter
-;; if some key is pressed while the focus is
-;; on the video window, the application terminates
+;; Author: Peter Samarin
+;; Date: 2013
+;; Description: Capture video from a camera, apply canny filter
+;; if some key is pressed while the focus is on the video window,
+;; then the application terminates
 ;; Tested with iSight camera of my MacBook Pro
 
 ;;; Includes
-(require "../src/types.rkt"
-         "../src/core.rkt"
-         "../src/highgui.rkt"
-         "../src/imgproc.rkt")
+(require (planet petr/opencv/highgui)
+         (planet petr/opencv/imgproc))
 
 (define capture (cvCaptureFromCAM 0))
 
@@ -30,20 +26,18 @@
 (define channels (IplImage-nChannels captured-image))
 
 ;; Init an IplImage to where captured images will be copied
-(define frame (cvCreateImage size IPL_DEPTH_8U 1))
+(define frame (cvCreateImage size depth 1))
 (define out #f)
 
 (let loop ()
   (set! captured-image (cvQueryFrame capture))
   (cvConvertImage captured-image frame IPL_DEPTH_8U)
   (cvSmooth frame frame CV_GAUSSIAN 11 11 0.0 0.0)
-  ;;(set! out (doPyrDown frame))
-  (cvCanny frame frame 50.0 100.0 3)  
-  (cvShowImage "Video Capture" frame)
-  ;;(cvReleaseImage out)  
+  (cvCanny frame frame 50.0 100.0 3)
+  (cvShowImage "Video Canny" frame)
   (unless (>= (cvWaitKey 1) 0)
     (loop)))
 
-;; clean up
+;; clean up (not really necessary, because the application exits)
 (cvReleaseCapture capture)
-(cvDestroyWindow "Video Capture")
+(cvDestroyAllWindows)
