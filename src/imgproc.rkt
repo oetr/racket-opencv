@@ -1,7 +1,6 @@
-;; Author: Petr Samarin
-;; Description: Porting imgproc_c.h to Racket
+;; Author: Peter Samarin
 
-(module core racket
+(module imgproc racket
   (provide (all-defined-out))
   ;; Racket Foreign interface
   (require ffi/unsafe
@@ -15,21 +14,21 @@
   (define-ffi-definer define-opencv-imgproc
     (ffi-lib "/opt/local/lib/libopencv_imgproc"))
 
-  (define-syntax (defimgproc stx)
-    (syntax-case stx ()
-      [(defimgproc name #:ptr type)
-       #`(begin (provide name)
-                (define name
-                  (let ()
-                    (define-opencv-imgproc ptr _pointer
-                      #:c-id #,(datum->syntax
-                                #'name
-                                (string->symbol
-                                 (format "_~a" (syntax->datum #'name)))))
-                    (function-ptr ptr type))))]
-      [(defimgproc name type)
-       #'(begin (provide name)
-                (define-opencv-imgproc name type))]))   
+  ;; (define-syntax (defimgproc stx)
+  ;;   (syntax-case stx ()
+  ;;     [(defimgproc name #:ptr type)
+  ;;      #`(begin (provide name)
+  ;;               (define name
+  ;;                 (let ()
+  ;;                   (define-opencv-imgproc ptr _pointer
+  ;;                     #:c-id #,(datum->syntax
+  ;;                               #'name
+  ;;                               (string->symbol
+  ;;                                (format "_~a" (syntax->datum #'name)))))
+  ;;                   (function-ptr ptr type))))]
+  ;;     [(defimgproc name type)
+  ;;      #'(begin (provide name)
+  ;;               (define-opencv-imgproc name type))]))
 
 
   ;; TODO: describe functions with comments, not names?

@@ -1,7 +1,6 @@
-;; Author: Petr Samarin
-;; Description: Porting highgui_c.h to Racket
+;; Author: Peter Samarin
 
-(module highgui racket
+(module objdetect racket
   (provide (all-defined-out))
 ;;; Libraries
   ;; Racket Foreign interface

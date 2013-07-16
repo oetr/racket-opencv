@@ -1,3 +1,5 @@
+;; Author: Peter Samarin
+
 (module types racket
   (provide (all-defined-out))  
 

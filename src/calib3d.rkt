@@ -1,5 +1,4 @@
 ;; Author: Peter Samarin
-;; Description: Porting callib3d.hpp to Racket
 
 (module core racket
   (provide (all-defined-out))

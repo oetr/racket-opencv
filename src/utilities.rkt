@@ -1,7 +1,8 @@
 #|
+Author: Peter Samarin
 utilities.rkt: helpers to reduce complexity
-Copyleft (C) Peter Samarin
 |#
+
 (module opencv-lib racket
   (require ffi/unsafe)
            

@@ -1,5 +1,4 @@
-;; Author: Petr Samarin
-;; Description: Porting highgui_c.h to Racket
+;; Author: Peter Samarin
 
 (module highgui racket
   (provide (all-defined-out))
