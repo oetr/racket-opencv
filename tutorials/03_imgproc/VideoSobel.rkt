@@ -2,7 +2,7 @@
 #lang racket
 
 ;; Author: Peter Samarin
-;; Date: 2012
+;; Date: 2013
 ;; Description: Sobel detection on camera images
 ;; Tested with iSight camera of my MacBook Pro
 
