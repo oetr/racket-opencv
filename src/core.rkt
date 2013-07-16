@@ -1,17 +1,37 @@
 
 ;; Author: Peter Samarin
 
-(module core racket
-  (provide (all-defined-out))
+(module core racket/base
   ;; Racket Foreign interface
   (require ffi/unsafe
            ffi/unsafe/define
            ffi/vector
+           ffi/winapi
+           racket/runtime-path
            "types.rkt"
            "utilities.rkt")
 
-  (define-ffi-definer define-opencv-core
-    (ffi-lib "/opt/local/lib/libopencv_core"))
+  (define stype (system-type))
+
+  (define-runtime-path here ".")
+  
+  (define opencv-core-lib
+    (case stype
+      [(windows)
+       (ffi-lib
+        (build-path here (system-library-subpath #f)
+                    "libopencv_core246"))]
+      [(macosx) (ffi-lib "/opt/local/lib/libopencv_core")]
+      [else (ffi-lib "libopencv_core")]))
+  
+  (define-ffi-definer define-opencv-core-internal opencv-core-lib)
+
+  (define-syntax define-opencv-core
+    (syntax-rules ()
+      [(_ name body)
+       (begin
+         (provide name)
+         (define-opencv-core-internal name body))]))
 
   #|***********************************************************************
   *  Array allocation, deallocation, initialization and access to elements 
@@ -41,7 +61,7 @@
   (define-opencv-core cvReleaseImage
     (_fun (_ptr io _pointer) -> _void))
 
-  (define (cvReleaseImages . images)
+  (define+provide (cvReleaseImages . images)
     (andmap cvReleaseImage images))
   
   #| Creates a copy of IPL image (widthStep may differ) |#
@@ -79,7 +99,7 @@
           -> (mat : (_ptr io _CvMat))
           -> (ptr-ref mat _CvMat)))
   
-  (define CV_AUTOSTEP  #x7fffffff)
+  (define+provide CV_AUTOSTEP  #x7fffffff)
 
 
   #| Initializes CvMat header |#
@@ -112,7 +132,7 @@
           -> (mat : _pointer)
           -> (ptr-ref mat _CvMat)))
   
-  (define cvGetSubArr cvGetSubRect)
+  (define+provide cvGetSubArr cvGetSubRect)
 
   #| Selects row span of the input array: arr(start_row:delta_row:end_row,:)
   (end_row is not included into the span). |#
@@ -126,7 +146,7 @@
           -> (mat : _pointer)
           -> (ptr-ref mat _CvMat)))
 
-  (define (cvGetRow arr submat row)
+  (define+provide (cvGetRow arr submat row)
     (cvGetRows arr submat row (+ row 1)))
 
   #| Selects column span of the input array: arr(:,start_col:end_col)
@@ -136,7 +156,7 @@
           -> (mat : _pointer)
           -> (ptr-ref mat _CvMat)))
 
-  (define (cvGetCol arr submat col)
+  (define+provide (cvGetCol arr submat col)
     (cvGetCols arr submat col (+ col 1)))
 
 
@@ -181,9 +201,9 @@
 
 
   ;;;;;;;;; matrix iterator: used for n-ary operations on dense arrays ;;;;;;;
-  (define CV_MAX_ARR 10)
+  (define+provide CV_MAX_ARR 10)
 
-  ;; (define-cstruct _CvNArrayIterator
+  ;; (define+provide-cstruct _CvNArrayIterator
   ;;   ([count _int] ;; number of arrays
   ;;    [dims _int] ;; number of dimensions to iterate
   ;;    [size _CvSize] ;; maximal common linear size: { width = size, height = 1 }
@@ -191,9 +211,9 @@
   ;;    [stack (_array _int CV_MAX_DIM)] ;; for internal use
   ;;    [hdr _pointer])) ;; pointers to the headers of processed matrices
 
-  (define CV_NO_DEPTH_CHECK     1)
-  (define CV_NO_CN_CHECK        2)
-  (define CV_NO_SIZE_CHECK      4)
+  (define+provide CV_NO_DEPTH_CHECK     1)
+  (define+provide CV_NO_CN_CHECK        2)
+  (define+provide CV_NO_SIZE_CHECK      4)
 
 
   #| Converts CvArr (IplImage or CvMat,...) to CvMat.
@@ -226,14 +246,14 @@
   * (Use together with cvCreateData, or use cvCreateMat instead to
   * get a matrix with allocated data):
   |#
-  (define (cvMat rows cols type (data-ptr #f))
+  (define+provide (cvMat rows cols type (data-ptr #f))
     (unless (<= (CV_MAT_DEPTH type) CV_64F)
       (raise-type-error cvMat "<= CV_64F" type))
     (define mat (make-CvMat type (* cols (CV_ELEM_SIZE type))
                             #f 0 (malloc 'atomic _ubyte) rows cols))
     mat)
   ;; (cvCreateData arr)
-  ;;   (define arr (cvCreateMatHeader rows cols type))
+  ;;   (define+provide arr (cvCreateMatHeader rows cols type))
   
   ;;   (set-CvMat-refcount! arr #f)
   ;;   (set-CvMat-hdr_refcount! arr 0)
@@ -275,7 +295,7 @@
   (define-opencv-core cvSetZero
     (_fun _pointer -> _void))
 
-  (define cvZero cvSetZero)
+  (define+provide cvZero cvSetZero)
 
   #| Splits a multi-channel array into the set of single-channel arrays or
   extracts particular [color] plane |#
@@ -312,8 +332,8 @@
           (scale : _double)
           (shift : _double)
           -> _void))
-  (define cvScale  cvConvertScale)
-  (define (cvConvert src dst)
+  (define+provide cvScale  cvConvertScale)
+  (define+provide (cvConvert src dst)
     (cvConvertScale src dst 1.0 0.0))
 
   #| Performs linear transformation on every source array element,
@@ -329,7 +349,7 @@
           (shift : _double)
           -> _void))
   
-  (define cvCvtScaleAbs  cvConvertScaleAbs)
+  (define+provide cvCvtScaleAbs  cvConvertScaleAbs)
 
   ;; Copies source array to destination array
   (define-opencv-core cvCopy
@@ -339,7 +359,7 @@
           (mask : _pointer)
           -> _void))
 
-  (define (copy-image img (mask #f))
+  (define+provide (copy-image img (mask #f))
     (cond [(IplImage? img)
            (define out (cvCreateImage (make-CvSize (IplImage-width img)
                                                    (IplImage-height img))
@@ -356,11 +376,11 @@
            out]))
 
 
-  (define (make-c-array size type)
+  (define+provide (make-c-array size type)
     (ptr-ref (malloc 'atomic type size)
              (_array type size)))
 
-  (define (c-array type . vals)
+  (define+provide (c-array type . vals)
     (define an-array (make-c-array (length vals) type))
     (for ([val (in-list vals)]
           [i (in-range 0 (length vals))])
@@ -462,12 +482,12 @@
   (define-opencv-core cvInRangeS
     (_fun _pointer _CvScalar _CvScalar _pointer -> _void))
 
-  (define CV_CMP_EQ   0)
-  (define CV_CMP_GT   1)
-  (define CV_CMP_GE   2)
-  (define CV_CMP_LT   3)
-  (define CV_CMP_LE   4)
-  (define CV_CMP_NE   5)
+  (define+provide CV_CMP_EQ   0)
+  (define+provide CV_CMP_GT   1)
+  (define+provide CV_CMP_GE   2)
+  (define+provide CV_CMP_LT   3)
+  (define+provide CV_CMP_LE   4)
+  (define+provide CV_CMP_NE   5)
 
   ;; ***************************************************************************
   ;;                   Array statistics
@@ -580,8 +600,8 @@
           [element : _pointer]
           -> _void))
 
-  (define CV_FRONT 1)
-  (define CV_BACK 0)
+  (define+provide CV_FRONT 1)
+  (define+provide CV_BACK 0)
 
 
   #| Removes all the elements from the sequence. The freed memory
@@ -609,27 +629,28 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Drawing
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (define (CV_RGB r g b)
+  (define+provide (CV_RGB r g b)
     (cvScalar b g r 0))
-  (define CV_FILLED -1)
-  (define CV_AA 16)
+  (define+provide CV_FILLED -1)
+  (define+provide CV_AA 16)
 
   #| basic font types |#
-  (define CV_FONT_HERSHEY_SIMPLEX         0)
-  (define CV_FONT_HERSHEY_PLAIN           1)
-  (define CV_FONT_HERSHEY_DUPLEX          2)
-  (define CV_FONT_HERSHEY_COMPLEX         3)
-  (define CV_FONT_HERSHEY_TRIPLEX         4)
-  (define CV_FONT_HERSHEY_COMPLEX_SMALL   5)
-  (define CV_FONT_HERSHEY_SCRIPT_SIMPLEX  6)
-  (define CV_FONT_HERSHEY_SCRIPT_COMPLEX  7)
+  (define+provide CV_FONT_HERSHEY_SIMPLEX         0)
+  (define+provide CV_FONT_HERSHEY_PLAIN           1)
+  (define+provide CV_FONT_HERSHEY_DUPLEX          2)
+  (define+provide CV_FONT_HERSHEY_COMPLEX         3)
+  (define+provide CV_FONT_HERSHEY_TRIPLEX         4)
+  (define+provide CV_FONT_HERSHEY_COMPLEX_SMALL   5)
+  (define+provide CV_FONT_HERSHEY_SCRIPT_SIMPLEX  6)
+  (define+provide CV_FONT_HERSHEY_SCRIPT_COMPLEX  7)
 
   ;; font flags
-  (define CV_FONT_ITALIC                 16)
+  (define+provide CV_FONT_ITALIC                 16)
 
-  (define CV_FONT_VECTOR0    CV_FONT_HERSHEY_SIMPLEX)
+  (define+provide CV_FONT_VECTOR0    CV_FONT_HERSHEY_SIMPLEX)
+  
   ;; Font structure
-  (define-cstruct _CvFont
+  (define+provide-cstruct _CvFont
     ([nameFont _string]     ;; Qt:nameFont
      ;; Qt:ColorFont -> cvScalar(blue_component, green_component,
      ;; red\_component[, alpha_component])
@@ -659,7 +680,7 @@
           -> _void))
 
   
-  (define (cvFont scale (thickness 1))
+  (define+provide (cvFont scale (thickness 1))
     (cvInitFont CV_FONT_HERSHEY_PLAIN scale scale 0.0 thickness CV_AA))
 
   #| Draws a rectangle given two opposite corners of the rectangle (pt1 & pt2),

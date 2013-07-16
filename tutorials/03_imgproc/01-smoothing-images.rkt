@@ -10,24 +10,33 @@
 ;; Applies 4 different kinds of filters and shows the filtered images sequentially
 
 ;;; Includes
-(require (planet petr/opencv/highgui)
+(require (planet petr/opencv/src/core)
+         (planet petr/opencv/src/types)
+         (planet petr/opencv/highgui)
          (planet petr/opencv/imgproc)
          ffi/unsafe
          ffi/unsafe/define)
 
-(define (display-caption caption)  
-  (cvSetZero dst)
+
+;; load an image into a Mat array
+(define src (imread "../images/Lena.jpg"))
+(define blank (cvCreateMat (CvMat-rows src) (CvMat-cols src) (CvMat-type src)))
+(define dst (cvCloneMat src))
+
+
+(define (display-caption caption)
+  (cvZero blank)
   (define font1 (malloc _CvFont 'atomic))
   (cvInitFont font1 CV_FONT_HERSHEY_SIMPLEX 0.5 0.5)
-  (cvPutText dst caption
+  (cvPutText blank caption
              (make-CvPoint (/ (CvMat-cols src) 4)
                            (/ (CvMat-rows src) 2))
              font1
              (CV_RGB 120 120 120))
-  (imshow window-name dst)
+  (imshow window-name blank)
   (if (>= (cvWaitKey DELAY_CAPTION) 0) -1 0))
 
-(define (display-dst delay)
+(define (display-dst dst delay)
   (imshow window-name dst)
   (if (>= (cvWaitKey delay) 0) -1 0))
 
@@ -36,16 +45,12 @@
 (define DELAY_BLUR        100)
 (define MAX_KERNEL_LENGTH 31)
 
-(define window-name "Filter Demo 1")
-
-;; load an image into a Mat array
-(define src (imread "../images/Lena.jpg"))
-(define dst (cvCloneMat src))
+(define window-name "Filter Demo")
 
 (when (not (zero? (display-caption "Original Image")))
   (exit))
 
-(when (not (zero? (display-dst DELAY_CAPTION)))
+(when (not (zero? (display-dst dst DELAY_CAPTION)))
   (exit))
 
 ;;; Applying Homogeneous blur
@@ -54,7 +59,7 @@
 
 (for ([i (in-range 1 MAX_KERNEL_LENGTH 2)])
      (cvSmooth src dst CV_BLUR i 0 0.0 0.0)
-     (when (not (zero? (display-dst DELAY_BLUR)))
+     (when (not (zero? (display-dst dst DELAY_BLUR)))
        (exit)))
 
 ;;; Applying Gaussian blur
@@ -63,7 +68,7 @@
 
 (for ([i (in-range 1 MAX_KERNEL_LENGTH 2)])
      (cvSmooth src dst CV_GAUSSIAN i 0 0.0 0.0)
-     (when (not (zero? (display-dst DELAY_BLUR)))
+     (when (not (zero? (display-dst dst DELAY_BLUR)))
        (exit)))
 
 ;;; Applying Median blur
@@ -72,7 +77,7 @@
 
 (for ([i (in-range 1 MAX_KERNEL_LENGTH 2)])
      (cvSmooth src dst CV_MEDIAN i 0 0.0 0.0)
-     (when (not (zero? (display-dst DELAY_BLUR)))
+     (when (not (zero? (display-dst dst DELAY_BLUR)))
        (exit)))
 
 ;;; Applying Bilateral blur
@@ -81,7 +86,7 @@
 
 (for ([i (in-range 1 MAX_KERNEL_LENGTH 2)])
      (cvSmooth src dst CV_BILATERAL i 0 (* i 2.0) (/ i 2.0))
-     (when (not (zero? (display-dst DELAY_BLUR)))
+     (when (not (zero? (display-dst dst DELAY_BLUR)))
        (exit)))
 
 ;;; Wait until user press a key
