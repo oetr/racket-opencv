@@ -1,5 +1,0 @@
-This directory contains tests to make sure that all provided functions work properly.
-Tests can help in avoiding segmentation faults and make the library more Racket-like.
-
-* TODO Test every procedure provided by the OpenCV library
-
