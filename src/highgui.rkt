@@ -16,7 +16,7 @@
     (case stype
       [(windows)
        (ffi-lib
-        (build-path here (system-library-subpath #f)
+        (build-path (system-library-subpath #f)
                     "libopencv_highgui246"))]
       [(macosx) (ffi-lib "/opt/local/lib/libopencv_highgui")]
       [else (ffi-lib "libopencv_highgui")]))
