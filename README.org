@@ -1,7 +1,9 @@
 This project ports a subset of the [[http://opencv.org/][OpenCV]] library to Racket by using the [[http://docs.racket-lang.org/foreign/index.html?q=ctype&q=_cpointer&q=make-cvector&q=time*&q=time&q=yield][Racket Foreign Interface]].
 Check the /turorials/ folder to get started.
 
-* TODO Installation
+* Installation
+`cd /your/download/path`
+`raco pkg install`
 
 
 * Style
