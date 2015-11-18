@@ -3,7 +3,9 @@ Check the /turorials/ folder to get started.
 
 * Installation
 =git clone https://github.com/oetr/racket-opencv.git=  
+
 =cd racket-opencv=  
+
 =raco pkg install=
 
 
