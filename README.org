@@ -2,8 +2,8 @@ This project ports a subset of the [[http://opencv.org/][OpenCV]] library to Rac
 Check the /turorials/ folder to get started.
 
 * Installation
-`cd /your/download/path`
-`raco pkg install`
+=cd /your/download/path=
+=raco pkg install=
 
 
 * Style
