@@ -2,7 +2,8 @@ This project ports a subset of the [[http://opencv.org/][OpenCV]] library to Rac
 Check the /turorials/ folder to get started.
 
 * Installation
-=cd /your/download/path=
+=git clone https://github.com/oetr/racket-opencv.git=  
+=cd racket-opencv=  
 =raco pkg install=
 
 
