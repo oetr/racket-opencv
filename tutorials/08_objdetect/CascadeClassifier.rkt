@@ -6,9 +6,12 @@
 ;; Description: Cascade classifier
 ;; ported from an OpenCV tutorial http://docs.opencv.org/doc/tutorials/objdetect/cascade_classifier/cascade_classifier.html
 
-(require (planet petr/opencv/highgui)
-         (planet petr/opencv/imgproc)
-         (planet petr/opencv/objdetect)
+(require opencv/core
+         opencv/types
+         opencv/imgproc
+         opencv/videoio
+         opencv/highgui
+         opencv/objdetect
          ffi/unsafe)
 
 ;; Global variables

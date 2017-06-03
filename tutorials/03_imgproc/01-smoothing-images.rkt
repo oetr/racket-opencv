@@ -1,6 +1,4 @@
 #! /usr/bin/env racket
-#lang racket
-
 ;; Author: Peter Samarin
 ;; Date: 2012
 ;; Description:
@@ -8,18 +6,26 @@
 ;; http://docs.opencv.org/doc/tutorials/imgproc/gausian_median_blur_bilateral_filter/gausian_median_blur_bilateral_filter.html
 ;; this example loads an image
 ;; Applies 4 different kinds of filters and shows the filtered images sequentially
+#lang racket
 
 ;;; Includes
-(require (planet petr/opencv/src/core)
-         (planet petr/opencv/src/types)
-         (planet petr/opencv/highgui)
-         (planet petr/opencv/imgproc)
+(require opencv/core
+         opencv/types
+         opencv/highgui
+         opencv/imgproc
          ffi/unsafe
          ffi/unsafe/define)
 
 
+;; Get path to the image from the command line arguments
+(define arguments (current-command-line-arguments))
+(unless (= (vector-length arguments) 1)
+  (printf "Usage: ./01-smoothing-images.rkt in-image~n")
+  (exit))
+(define in-image (vector-ref arguments 0))
+
 ;; load an image into a Mat array
-(define src (imread "../images/Lena.jpg"))
+(define src (imread in-image))
 (define blank (cvCreateMat (CvMat-rows src) (CvMat-cols src) (CvMat-type src)))
 (define dst (cvCloneMat src))
 

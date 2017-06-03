@@ -1,16 +1,17 @@
 #! /usr/bin/env racket
-#lang racket
-
 ;; Author: Petr Samarin
 ;; Date: 2012
 ;; Description:
 ;; Capture video from a camera
 ;; if some key is pressed while the focus is on the video window, the application terminates
-;; Tested with iSight camera of my MacBook Pro
+#lang racket
 
 ;;; Includes
-(require (planet petr/opencv/highgui)
-         (planet petr/opencv/imgproc))
+(require opencv/core
+         opencv/types
+         opencv/highgui
+         opencv/imgproc
+         opencv/videoio)
 
 (define capture (cvCaptureFromCAM 0))
 

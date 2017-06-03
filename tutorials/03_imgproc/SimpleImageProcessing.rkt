@@ -1,6 +1,4 @@
 #! /usr/bin/env racket
-#lang racket
-
 ;; Author: Peter Samarin
 ;; Date: 2013
 ;; Description:
@@ -11,13 +9,23 @@
 ;; This example was inspired by:
 ;; http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/
 ;; and the book "Learning OpenCV" by Bradski and Kaehler, 2008
+#lang racket/base
 
 ;;; Includes
-(require (planet petr/opencv/highgui)
-         (planet petr/opencv/imgproc))
+(require opencv/core
+         opencv/types
+         opencv/highgui
+         opencv/imgproc)
+
+;; Get path to the image from the command line arguments
+(define arguments (current-command-line-arguments))
+(unless (= (vector-length arguments) 1)
+  (printf "Usage: ./SimpleImageProcessing.rkt in-image~n")
+  (exit))
+(define in-image (vector-ref arguments 0))
 
 ;;; Load an image from the hard disk
-(define img (cvLoadImage "../images/Lena.jpg" CV_LOAD_IMAGE_COLOR))
+(define img (cvLoadImage in-image CV_LOAD_IMAGE_COLOR))
 
 ;;; Get image properties
 (define height     (IplImage-height img))
@@ -62,7 +70,7 @@
 
 ;;; Show the image
 ;; it is not necessary to create a named window before showing the image
-;; (cvNamedWindow "Main Window" CV_WINDOW_AUTOSIZE)
+(cvNamedWindow "Main Window" CV_WINDOW_AUTOSIZE)
 (imshow "Main Window" img)
 (define x (cvGetWindowHandle "Main Window"))
 (cvMoveWindow "Main Window" 500 150)
@@ -71,4 +79,4 @@
 (define key (cvWaitKey 0))
 (printf "received key: ~a~n" key)
 
-(cvDestroyAllWindows)
+(exit 0)

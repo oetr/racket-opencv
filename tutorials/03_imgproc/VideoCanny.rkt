@@ -9,8 +9,11 @@
 ;; Tested with iSight camera of my MacBook Pro
 
 ;;; Includes
-(require (planet petr/opencv/highgui)
-         (planet petr/opencv/imgproc))
+(require opencv/core
+         opencv/types
+         opencv/highgui
+         opencv/imgproc
+         opencv/videoio)
 
 (define capture (cvCaptureFromCAM 0))
 

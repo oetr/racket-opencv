@@ -1,15 +1,16 @@
 #! /usr/bin/env racket
-#lang racket
-
 ;; Author: Peter Samarin
 ;; Date: 2013
 ;; Description: subpixel corner detection
 ;; converted from C++ code in
 ;; http://docs.opencv.org/doc/tutorials/features2d/trackingmotion/corner_subpixeles/corner_subpixeles.html
+#lang racket
 
 ;;; Includes
-(require (planet petr/opencv/highgui)
-         (planet petr/opencv/imgproc)
+(require opencv/core
+         opencv/types
+         opencv/imgproc
+         opencv/highgui
          ffi/cvector)
 
 (define arguments (current-command-line-arguments))
