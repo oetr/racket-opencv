@@ -1,6 +1,6 @@
 #! /usr/bin/env racket
 ;; Author: Peter Samarin
-;; Load, display, and save an image specified on the command line
+;; Load and display an image specified on the command line
 ;; converted from an example in opencv documentation
 ;; http://docs.opencv.org/doc/tutorials/tutorials.html
 #lang racket/base
@@ -9,7 +9,7 @@
 
 (define arguments (current-command-line-arguments))
 (unless (= (vector-length arguments) 1)
-  (printf "No image data~n")
+  (printf "Usage: ./01-display-image.rkt in-image~n")
   (exit))
 
 (define image (imread (vector-ref arguments 0) CV_LOAD_IMAGE_COLOR))

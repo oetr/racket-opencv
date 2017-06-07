@@ -9,10 +9,7 @@
 #lang racket/base
 
 ;;; Includes
-(require opencv/highgui
-         opencv/imgproc
-         opencv/types
-         opencv/core)
+(require opencv/highgui)
 
 
 ;; Get path to the image from the command line arguments

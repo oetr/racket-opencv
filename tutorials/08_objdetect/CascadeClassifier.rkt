@@ -1,16 +1,12 @@
 #! /usr/bin/env racket
-#lang racket
-
 ;; Author: Peter Samarin
 ;; Date: 2013
 ;; Description: Cascade classifier
 ;; ported from an OpenCV tutorial http://docs.opencv.org/doc/tutorials/objdetect/cascade_classifier/cascade_classifier.html
 
-(require opencv/core
-         opencv/types
-         opencv/imgproc
-         opencv/videoio
-         opencv/highgui
+#lang racket
+
+(require opencv/highgui
          opencv/objdetect
          ffi/unsafe)
 
@@ -92,5 +88,6 @@
   (unless (>= (cvWaitKey 5) 0)
     (loop)))
 
+
 (cvReleaseCapture capture)
-(cvDestroyWindow window-name)
+(cvDestroyAllWindows)

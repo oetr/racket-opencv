@@ -5,7 +5,6 @@
 ;; Racket Foreign interface
 (require ffi/unsafe
          ffi/unsafe/define
-         rackunit
          ;; OpenCV requirements
          "types.rkt"
          "core.rkt"
